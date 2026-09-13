@@ -13,9 +13,9 @@
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen">
 
-<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between border-r border-outline-variant/30">
+<aside id="app-sidebar" class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between border-r border-outline-variant/30">
   <div class="flex flex-col">
-      <div class="px-space-md pt-space-lg pb-space-sm">
+      <div class="px-space-md pt-space-lg pb-space-sm flex items-center justify-between">
         <a class="flex items-center gap-4 px-space-sm" href="{{ url_for('dashboard') }}">
           <img alt="Organizador Facultad Logo" class="h-8 w-auto object-contain" src="{{ url_for('static', filename='img/logo.svg') }}">
           <div class="flex flex-col">
@@ -23,6 +23,9 @@
             <span class="font-label-sm text-[11px] text-on-surface-variant leading-tight">Facultad</span>
           </div>
         </a>
+        <button aria-label="Cerrar menú" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" id="app-sidebar-close" type="button">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
       </div>
     <div class="px-space-md pb-space-md flex flex-col">
       <nav class="flex flex-col gap-1.5">
@@ -67,8 +70,13 @@
   </div>
 </aside>
 
-<div class="pl-64">
-  <header class="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-md z-40 flex items-center justify-end px-8 lg:px-10 border-b border-outline-variant/25">
+<div aria-hidden="true" id="sidebar-backdrop"></div>
+
+<div class="pl-64" id="app-main-wrap">
+  <header class="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-md z-40 flex items-center justify-end px-8 lg:px-10 border-b border-outline-variant/25" id="app-header">
+    <button aria-label="Abrir menú" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" id="sidebar-toggle" type="button">
+      <span class="material-symbols-outlined text-[22px]">menu</span>
+    </button>
     <div class="flex items-center gap-2">
       <button aria-label="Cambiar tema" id="theme-toggle" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button">
         <span class="material-symbols-outlined text-[20px]">{% if current_user and current_user['theme'] == 'dark' %}light_mode{% else %}dark_mode{% endif %}</span>
@@ -86,7 +94,7 @@
     </div>
   </header>
 
-  <main class="w-full pt-24 px-8 lg:px-10 pb-14 min-h-screen flex flex-col gap-8">
+  <main class="w-full pt-24 px-8 lg:px-10 pb-14 min-h-screen flex flex-col gap-8" id="app-main">
     {% block content %}{% endblock %}
   </main>
 </div>

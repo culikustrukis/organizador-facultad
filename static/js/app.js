@@ -85,6 +85,34 @@
     });
   }
 
+  var sidebarEl = document.getElementById('app-sidebar');
+  var backdropEl = document.getElementById('sidebar-backdrop');
+  var sidebarToggle = document.getElementById('sidebar-toggle');
+  var sidebarClose = document.getElementById('app-sidebar-close');
+
+  function openSidebar() {
+    document.body.classList.add('sidebar-open');
+  }
+  function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+  }
+  if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
+  if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+  if (backdropEl) backdropEl.addEventListener('click', closeSidebar);
+
+  if (sidebarEl) {
+    sidebarEl.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeSidebar);
+    });
+  }
+
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 768) closeSidebar();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
   window.fetcher = fetchJson;
   window.showToast = toast;
 })();

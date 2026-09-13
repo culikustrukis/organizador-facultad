@@ -33,7 +33,30 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "organizador-facultad-dev-key"
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+
+
+# Cookies de sesión y HTTPS:
+#  - Si SESSION_COOKIE_SECURE está definido en el entorno (1 o 0), se respeta ese valor.
+#  - Si está vacío/ausente, se decide automáticamente según si la petición es HTTPS.
+#  De esta forma el desarrollo por HTTP en la red local funciona, y en producción
+#  (Render detrás de HTTPS) la cookie sigue siendo `Secure`, sin cambiar código.
+_FORCE_SESSION_SECURE = os.environ.get("SESSION_COOKIE_SECURE")
+if _FORCE_SESSION_SECURE is not None and _FORCE_SESSION_SECURE.strip() == "":
+    _FORCE_SESSION_SECURE = None
+if _FORCE_SESSION_SECURE is not None:
+    _FORCE_SESSION_SECURE = _FORCE_SESSION_SECURE.strip().lower() in ("1", "true", "yes", "on")
+
+# Render/HTTPS llega por proxy con X-Forwarded-Proto; lo usamos para detectar HTTPS.
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+
+
+@app.before_request
+def _configurar_secure_sesion():
+    app.config["SESSION_COOKIE_SECURE"] = (
+        _FORCE_SESSION_SECURE if _FORCE_SESSION_SECURE is not None else request.is_secure
+    )
 
 
 def allowed_file(filename):
@@ -886,4 +909,4 @@ iniciar()
 
 
 if __name__ == "__main__":
-    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1", host="127.0.0.1", port=5000)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1", host="0.0.0.0", port=5000)

@@ -55,11 +55,8 @@ python app.py
 Abrí [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
 Las tablas se crean automáticamente al iniciar la primera vez (no se borran ni se
-duplican datos en cada arranque). Si la base está vacía, se inserta un usuario
-demo con datos de ejemplo:
-
-- **Usuario demo:** `sofia`
-- **Contraseña:** `demo1234`
+duplican datos en cada arranque). No existe usuario de demostración: registrá tu
+propia cuenta para empezar a usar la app.
 
 ## Migración de datos
 
@@ -144,7 +141,7 @@ Para desarrollo con recarga automática de estilos: `npm run watch:css`.
 
 ```
 app.py                      Rutas de páginas y API JSON
-db.py                       Conexión PostgreSQL (psycopg), esquema y seed demo
+db.py                       Conexión PostgreSQL (psycopg), esquema e iniciación
 migrar_sqlite_a_postgresql.py  Migración de database.db → PostgreSQL
 utils.py                    Paleta de colores, conflictos, helpers de fechas
 templates/                  Vistas Jinja2 (base + 7 páginas)

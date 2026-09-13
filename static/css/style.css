@@ -214,3 +214,72 @@ html.dark {
   --tw-ring-shadow: 0 0 #0000 !important;
   box-shadow: none !important;
 }
+
+/* ============================================================
+   Responsive · Navegación con menú hamburguesa (<= 767px)
+   El diseño de escritorio (>= 768px) permanece intacto: el
+   sidebar sigue fijo y visible, y estos estilos no aplican.
+   ============================================================ */
+
+#sidebar-toggle,
+#app-sidebar-close,
+#sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  html, body { overflow-x: hidden; }
+
+  /* Header: hamburguesa a la izquierda, acciones a la derecha */
+  #app-header {
+    left: 0;
+    justify-content: space-between;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  #sidebar-toggle { display: inline-flex; }
+
+  /* Contenido principal ocupa todo el ancho */
+  #app-main-wrap { padding-left: 0; }
+  #app-main { padding-left: 1rem; padding-right: 1rem; }
+
+  /* Sidebar como drawer/overlay */
+  #app-sidebar {
+    transform: translateX(-100%);
+    max-width: 82vw;
+    overflow-y: auto;
+    will-change: transform;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  body.sidebar-open #app-sidebar {
+    transform: translateX(0);
+    box-shadow: 8px 0 32px -8px rgba(11, 28, 48, 0.4);
+  }
+  #app-sidebar-close { display: inline-flex; }
+
+  /* Overlay semitransparente detrás del drawer */
+  body.sidebar-open #sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(11, 28, 48, 0.45);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: fade-in 0.18s ease-out;
+  }
+  body.sidebar-open { overflow: hidden; }
+
+  /* Encabezado de las pantallas de autenticación */
+  #auth-header {
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.4rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+html.dark body.sidebar-open #sidebar-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}

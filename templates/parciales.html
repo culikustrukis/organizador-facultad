@@ -19,7 +19,7 @@
   </div>
 
   <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-    <div class="flex items-center gap-1.5 p-1 rounded-xl bg-surface-container-low">
+    <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-surface-container-low">
       <button class="filter-btn px-3.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md font-semibold shadow-sm transition-all" data-filter="all" type="button">Todos ({{ counts['todos'] }})</button>
       <button class="filter-btn px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-all" data-filter="primeros" type="button">Primeros Parciales ({{ counts['primeros'] }})</button>
       <button class="filter-btn px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-all" data-filter="recuperatorios" type="button">Recuperatorios ({{ counts['recuperatorios'] }})</button>

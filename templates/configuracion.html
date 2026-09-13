@@ -130,21 +130,21 @@
         <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Información de acceso de tu cuenta.</p>
       </div>
       <div class="p-6 flex flex-col gap-4">
-        <div class="flex items-center justify-between py-2 border-b border-outline-variant/15">
+        <div class="flex flex-wrap items-center justify-between gap-2 py-2 border-b border-outline-variant/15">
           <div>
             <p class="font-body-sm text-body-sm text-on-surface font-semibold">Usuario</p>
             <p class="font-label-sm text-label-sm text-on-surface-variant">Tu identificador para iniciar sesión</p>
           </div>
           <span class="font-label-md text-label-md px-3 py-1 rounded-lg bg-surface-container text-on-surface font-semibold">{{ current_user['username'] }}</span>
         </div>
-        <div class="flex items-center justify-between py-2 border-b border-outline-variant/15">
+        <div class="flex flex-wrap items-center justify-between gap-2 py-2 border-b border-outline-variant/15">
           <div>
             <p class="font-body-sm text-body-sm text-on-surface font-semibold">Correo electrónico</p>
             <p class="font-label-sm text-label-sm text-on-surface-variant">Usado para recuperación de cuenta</p>
           </div>
           <span class="font-label-md text-label-md px-3 py-1 rounded-lg bg-surface-container text-on-surface">{{ current_user['email'] or '—' }}</span>
         </div>
-        <div class="flex items-center justify-between pt-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
           <div>
             <p class="font-body-sm text-body-sm text-on-surface font-semibold">Cerrar sesión</p>
             <p class="font-label-sm text-label-sm text-on-surface-variant">Terminá la sesión en este dispositivo</p>
