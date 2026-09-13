@@ -15,7 +15,7 @@
           <span class="material-symbols-outlined text-[16px]">view_list</span>Lista
         </button>
         <button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-all" id="btn-view-kanban" type="button">
-          <span class="material-symbols-outlined text-[16px]">view_kanban</span>Kanban
+          <span class="material-symbols-outlined text-[16px]">view_kanban</span>Categoría
         </button>
       </div>
       <button class="inline-flex items-center gap-2 h-9 px-space-lg rounded-xl bg-primary text-on-primary font-label-lg text-[13px] hover:bg-primary-container transition-all shadow-md active:scale-95" id="btnNuevaTarea" type="button">
@@ -192,7 +192,7 @@
       </div>
       <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
         <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-tarea" type="button">Cancelar</button>
-        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar tarea</span></button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-0" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar tarea</span></button>
       </div>
     </form>
   </div>
@@ -201,7 +201,7 @@
 
 {% block scripts %}
 <script>
-  const TAREAS_DATA = {{ tareas_json | safe }};
+  var TAREAS_DATA = {{ tareas_json | safe }};
 </script>
 <script src="{{ url_for('static', filename='js/tareas.js') }}"></script>
 {% endblock %}

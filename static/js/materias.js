@@ -9,19 +9,7 @@
     document.getElementById('form-materia').reset();
     document.getElementById('materia_id').value = '';
     document.getElementById('modalMateriaTitle').textContent = 'Nueva materia';
-    setColor('indigo');
     openModal('modal-materia');
-  });
-
-  function setColor(key) {
-    document.querySelectorAll('#color-picker label').forEach(function (l) {
-      var input = l.querySelector('input[type="radio"]');
-      if (input && input.value === key) { input.checked = true; l.style.boxShadow = '0 0 0 2px var(--c-primary, #3525cd)'; }
-      else if (input) { l.style.boxShadow = 'none'; }
-    });
-  }
-  document.getElementById('color-picker').addEventListener('change', function (e) {
-    if (e.target.type === 'radio') setColor(e.target.value);
   });
 
   function fillForm(m) {
@@ -37,7 +25,6 @@
     document.getElementById('materia-regimen').value = m.regimen || 'promocionable';
     document.getElementById('materia-aula').value = m.aula || '';
     document.getElementById('materia-comision').value = m.comision || '';
-    setColor(m.color || 'indigo');
     document.getElementById('modalMateriaTitle').textContent = 'Editar materia';
   }
 
@@ -50,8 +37,7 @@
       horas_semana: document.getElementById('materia-horas').value,
       regimen: document.getElementById('materia-regimen').value,
       aula: document.getElementById('materia-aula').value,
-      comision: document.getElementById('materia-comision').value,
-      color: (document.querySelector('input[name="color"]:checked') || {}).value || 'indigo'
+      comision: document.getElementById('materia-comision').value
     };
   }
 

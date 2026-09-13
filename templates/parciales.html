@@ -14,7 +14,6 @@
       <p class="text-sm text-on-surface-variant mt-1">Calendario de parciales, recuperatorios y finales</p>
     </div>
     <div class="flex items-center gap-2">
-      <button class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors shadow-sm" type="button"><span class="material-symbols-outlined text-[18px]">calendar_month</span><span>Sincronizar</span></button>
       <button class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-colors shadow-sm" id="btnNuevoExamen" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Nuevo examen</span></button>
     </div>
   </div>
@@ -129,7 +128,7 @@
       </div>
       <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
         <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-examen" type="button">Cancelar</button>
-        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar examen</span></button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-0" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar examen</span></button>
       </div>
     </form>
   </div>
@@ -138,7 +137,7 @@
 
 {% block scripts %}
 <script>
-  const EXAMENES_DATA = {{ examenes_json | safe }};
+  var EXAMENES_DATA = {{ examenes_json | safe }};
 </script>
 <script src="{{ url_for('static', filename='js/parciales.js') }}"></script>
 {% endblock %}

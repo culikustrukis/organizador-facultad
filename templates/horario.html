@@ -227,7 +227,7 @@
       </div>
       <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
         <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-clase" type="button">Cancelar</button>
-        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar clase</span></button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-0" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar clase</span></button>
       </div>
     </form>
   </div>
@@ -236,7 +236,7 @@
 
 {% block scripts %}
 <script>
-  const CLASES_DATA = {{ clases_json | safe }};
+  var CLASES_DATA = {{ clases_json | safe }};
 </script>
 <script src="{{ url_for('static', filename='js/horario.js') }}"></script>
 {% endblock %}

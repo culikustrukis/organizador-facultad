@@ -201,3 +201,16 @@ html.dark {
   --c-error-container: 147 0 10;
   --c-on-error-container: 255 218 214;
 }
+
+/* Botones de guardar de los modales: sin recuadro azul al enfocar.
+   Se aplica SOLO a los botones tipo submit dentro de los modales
+   (materias, tareas, parciales, horario), sin tocar el focus de
+   los campos de texto ni el estilo normal del botón. */
+.modal-backdrop button[type="submit"]:focus,
+.modal-backdrop button[type="submit"]:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  box-shadow: none !important;
+}

@@ -13,7 +13,7 @@
       <h1 class="text-2xl lg:text-[28px] font-bold text-on-surface tracking-tight">Materias del Cuatrimestre</h1>
       <p class="text-sm text-on-surface-variant mt-0.5">Control de cursada, régimen de correlatividades y carga horaria semanal</p>
     </div>
-    <div class="flex flex-wrap items-center gap-space-sm">
+    <div class="flex flex-wrap items-center gap-4">
       <div class="flex items-center bg-surface-container-lowest px-3 py-2 rounded-lg shadow-sm border border-outline-variant/30">
         <span class="material-symbols-outlined text-outline text-[18px] mr-2">search</span>
         <input id="search-materia" class="bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none w-48 xl:w-64" placeholder="Buscar materia o docente..." type="text">
@@ -34,47 +34,33 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
-    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between gap-3">
       <div>
         <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total Materias</span>
         <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">{{ materias | length }} Cursadas</p>
         <span class="font-label-sm text-label-sm text-primary font-semibold">{{ total_horas }} hs reloj semanales</span>
       </div>
-      <div class="w-11 h-11 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
-        <span class="material-symbols-outlined text-[24px]">school</span>
-      </div>
     </div>
-    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between gap-3">
       <div>
         <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Régimen</span>
         <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">{{ promocionales }} Promocionales</p>
         <span class="font-label-sm text-label-sm text-tertiary font-semibold">{{ materias | length - promocionales }} con final obligatorio</span>
       </div>
-      <div class="w-11 h-11 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary">
-        <span class="material-symbols-outlined text-[24px]">workspace_premium</span>
-      </div>
     </div>
-    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between gap-3">
       <div>
         <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Asistencia Global</span>
         <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">92.4%</p>
         <span class="font-label-sm text-label-sm text-on-surface-variant">Requisito mín. 75%</span>
       </div>
-      <div class="w-11 h-11 rounded-xl bg-surface-container flex items-center justify-center text-on-surface">
-        <svg class="w-7 h-7" viewbox="0 0 36 36">
-          <path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
-          <path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="92, 100" stroke-linecap="round" stroke-width="3.5"></path>
-        </svg>
-      </div>
     </div>
-    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between gap-3">
       <div>
         <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Próximo Parcial</span>
         <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">{{ 'En ' ~ prox_examen['dias_restantes'] ~ ' días' if prox_examen else 'Sin fechas' }}</p>
         <span class="font-label-sm text-label-sm {% if prox_examen %}text-error{% else %}text-on-surface-variant{% endif %} font-semibold">{{ prox_examen['materia_nombre'] + ' (' + prox_examen['nombre'] + ')' if prox_examen else 'Cargá exámenes' }}</span>
-      </div>
-      <div class="w-11 h-11 rounded-xl bg-error-container flex items-center justify-center text-on-error-container">
-        <span class="material-symbols-outlined text-[24px]">event_upcoming</span>
       </div>
     </div>
   </div>
@@ -107,7 +93,7 @@
           {% for m in materias %}
           <tr class="hover:bg-surface-container-low/30 transition-colors border-t border-outline-variant/10" data-nombre="{{ m['nombre'] | lower }}" data-profesor="{{ m['profesor'] | lower }}" data-estado="{{ m['regimen'] }}">
             <td class="py-4 px-4">
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-4">
                 <div class="w-1.5 h-10 rounded-full {{ m['color']['dot'] if m['color']['dot'].startswith('bg-[#') else 'bg-primary' }}"></div>
                 <div class="min-w-0">
                   <span class="font-label-sm text-label-sm {{ m['color']['text'] }} font-bold tracking-wide">{{ m['codigo'] or 'S/C' }}</span>
@@ -116,10 +102,7 @@
               </div>
             </td>
             <td class="py-4 px-4 font-body-md text-body-md text-on-surface">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-outline text-[18px]">account_circle</span>
-                <span>{{ m['profesor'] or '—' }}</span>
-              </div>
+              <span>{{ m['profesor'] or '—' }}</span>
             </td>
             <td class="py-4 px-4">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">
@@ -230,20 +213,9 @@
           <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-comision" name="comision" placeholder="K3021">
         </div>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="font-label-sm text-label-sm font-semibold text-on-surface">Color de identificación</label>
-        <div class="grid grid-cols-6 gap-2" id="color-picker">
-          {% for key, c in COLORS.items() %}
-          <label class="flex items-center justify-center h-10 rounded-lg cursor-pointer border-2 transition-all" style="background:{{ c['light'] }}; border-color:{{ c['border_hex'] }};" title="{{ c['name'] }}">
-            <input class="hidden" type="radio" name="color" value="{{ key }}">
-            <span class="w-5 h-5 rounded-full" style="background:{{ c['hex'] }};"></span>
-          </label>
-          {% endfor %}
-        </div>
-      </div>
       <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
         <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-materia" type="button">Cancelar</button>
-        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar materia</span></button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-0" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar materia</span></button>
       </div>
     </form>
   </div>
@@ -252,7 +224,7 @@
 
 {% block scripts %}
 <script>
-  const MATERIAS_DATA = {{ materias_json | safe }};
+  var MATERIAS_DATA = {{ materias_json | safe }};
 </script>
 <script src="{{ url_for('static', filename='js/materias.js') }}"></script>
 {% endblock %}

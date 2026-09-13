@@ -548,6 +548,19 @@ def body_json():
     return request.get_json(silent=True) or {}
 
 
+def color_auto():
+    db = database.get_db()
+    rows = db.execute(
+        "SELECT color, COUNT(*) AS n FROM materias WHERE user_id = ? AND color != '' GROUP BY color",
+        (g.user["id"],),
+    ).fetchall()
+    usados = {r["color"]: r["n"] for r in rows}
+    orden = list(COLORS.keys())
+    if not orden:
+        return "indigo"
+    return min(orden, key=lambda k: (usados.get(k, 0), orden.index(k)))
+
+
 @app.route("/api/materias", methods=["POST"])
 @login_required
 def api_materia_create():
@@ -568,7 +581,7 @@ def api_materia_create():
             int(data.get("horas_semana") or 0),
             (data.get("aula") or "").strip(),
             (data.get("comision") or "").strip(),
-            data.get("color") or "indigo",
+            color_auto(),
             data.get("regimen") or "promocionable",
         ),
     )
@@ -595,7 +608,7 @@ def api_materia(materia_id):
         return jsonify({"ok": False, "message": "El nombre de la materia es obligatorio."}), 400
     db.execute(
         """UPDATE materias SET codigo = ?, nombre = ?, profesor = ?, modalidad = ?, horas_semana = ?,
-           aula = ?, comision = ?, color = ?, regimen = ? WHERE id = ?""",
+           aula = ?, comision = ?, regimen = ? WHERE id = ?""",
         (
             (data.get("codigo") or "").strip().upper(),
             nombre,
@@ -604,7 +617,6 @@ def api_materia(materia_id):
             int(data.get("horas_semana") or 0),
             (data.get("aula") or "").strip(),
             (data.get("comision") or "").strip(),
-            data.get("color") or "indigo",
             data.get("regimen") or "promocionable",
             materia_id,
         ),
@@ -721,27 +733,31 @@ def api_tarea_create():
 @login_required
 def api_tarea(tarea_id):
     db = database.get_db()
-    existing = db.execute(
-        "SELECT id FROM tareas WHERE id = ? AND user_id = ?", (tarea_id, g.user["id"])
+    row = db.execute(
+        "SELECT * FROM tareas WHERE id = ? AND user_id = ?", (tarea_id, g.user["id"])
     ).fetchone()
-    if not existing:
+    if not row:
         return jsonify({"ok": False, "message": "Tarea no encontrada."}), 404
     if request.method == "DELETE":
         db.execute("DELETE FROM tareas WHERE id = ?", (tarea_id,))
         db.commit()
         return jsonify({"ok": True})
     data = body_json()
+
+    def val(key):
+        return data[key] if key in data else row[key]
+
     db.execute(
         """UPDATE tareas SET titulo = ?, descripcion = ?, fecha_limite = ?, prioridad = ?,
            tipo_entrega = ?, estado = ?, materia_id = ? WHERE id = ?""",
         (
-            (data.get("titulo") or "").strip(),
-            (data.get("descripcion") or "").strip(),
-            (data.get("fecha_limite") or "").strip(),
-            data.get("prioridad") or "media",
-            data.get("tipo_entrega") or "individual",
-            data.get("estado") or "pendiente",
-            int(data.get("materia_id") or 0) or None,
+            (val("titulo") or "").strip(),
+            (val("descripcion") or "").strip(),
+            (val("fecha_limite") or "").strip(),
+            val("prioridad") or "media",
+            val("tipo_entrega") or "individual",
+            val("estado") or "pendiente",
+            int(val("materia_id") or 0) or None,
             tarea_id,
         ),
     )
