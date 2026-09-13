@@ -3,9 +3,12 @@ import json
 import os
 import uuid
 
+from dotenv import load_dotenv
 from flask import Flask, g, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+
+load_dotenv()
 
 import db as database
 from utils import (
@@ -30,6 +33,7 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "organizador-facultad-dev-key")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
 
 
 def allowed_file(filename):
@@ -878,4 +882,4 @@ iniciar()
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1", host="127.0.0.1", port=5000)

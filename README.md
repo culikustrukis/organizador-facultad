@@ -26,6 +26,40 @@ primera vez:
 - **Usuario demo:** `sofia`
 - **Contraseña:** `demo1234`
 
+## Configuración por variables de entorno
+
+La app lee opcionalmente un archivo `.env` (ver `.env.example`). En desarrollo no es
+necesario configurar nada; los valores por defecto son seguros para localhost.
+
+| Variable               | Uso                                                                                          | Default local |
+|------------------------|----------------------------------------------------------------------------------------------|---------------|
+| `SECRET_KEY`           | Firma las sesiones. En producción generarla con `python -c "import secrets; print(secrets.token_hex(32))"` | clave fija solo de desarrollo |
+| `FLASK_DEBUG`          | `1` activa el debug server con recarga automática (solo desarrollo)                          | `0`           |
+| `SESSION_COOKIE_SECURE`| `1` envía la cookie de sesión solo por HTTPS (producción con SSL)                            | `0`           |
+| `DATABASE_PATH`        | Ruta del archivo SQLite; útil en el servidor para usar almacenamiento persistente            | `database.db` junto al código |
+
+## Despliegue en producción
+
+La app es una aplicación WSGI estándar. El objeto se importa como `app:app`.
+
+```
+pip install -r requirements.txt
+gunicorn -w 2 -b 0.0.0.0:8000 app:app
+```
+
+Recomendaciones:
+
+- Definir `SECRET_KEY` (aleatoria y larga), `SESSION_COOKIE_SECURE=1` si hay HTTPS y
+  `FLASK_DEBUG=0`.
+- Apuntar `DATABASE_PATH` a un volumen persistente: la base debe vivir fuera del código
+  porque muchos hosts reemplazan el filesystem en cada despliegue. La carpeta de uploads
+  (`static/uploads`) también debe ser escribible.
+- El modo debug de desarrollo (`debug=True`) ya no es obligatorio: la app arranca
+  correctamente con debug apagado. En producción ejecutar con gunicorn (u otro servidor
+  WSGI como waitress) y no usar `python app.py` para servir tráfico real.
+- Gunicorn no se instala en Windows; el `requirements.txt` lo excluye con un marcador de
+  plataforma. Solo es necesario en el servidor.
+
 ## Recompilar estilos
 
 Los estilos ya compilados están en `static/css/tailwind.css`. Si querés regenerarlos
