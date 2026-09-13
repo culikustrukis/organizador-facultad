@@ -1,0 +1,46 @@
+{% extends "auth_base.html" %}
+{% block title %}Iniciar Sesión · Organizador Facultad{% endblock %}
+{% block content %}
+<div class="w-full max-w-md">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-[0_1px_8px_rgba(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden">
+    <div class="p-8 flex flex-col items-center text-center gap-2 border-b border-outline-variant/20 bg-gradient-to-b from-surface-container-low/60 to-transparent">
+      <div class="w-14 h-14 rounded-2xl bg-primary-container/15 flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-[28px]">school</span>
+      </div>
+      <h1 class="font-headline-xl text-[26px] text-on-surface font-bold tracking-tight">Organizador Facultad</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">Ingresá tus credenciales para acceder a tu panel académico</p>
+    </div>
+
+    <form id="login-form" class="p-8 flex flex-col gap-5">
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-md text-label-md text-on-surface font-semibold" for="login-user">Usuario o correo</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">person</span>
+          <input id="login-user" autocomplete="username" class="w-full h-11 pl-10 pr-4 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="nombre_usuario o correo" required type="text">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <div class="flex items-center justify-between">
+          <label class="font-label-md text-label-md text-on-surface font-semibold" for="login-password">Contraseña</label>
+          <span class="font-label-sm text-label-sm text-primary font-medium cursor-pointer hover:underline">¿Olvidaste tu contraseña?</span>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">lock</span>
+          <input id="login-password" autocomplete="current-password" class="w-full h-11 pl-10 pr-11 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Tu contraseña" required type="password">
+          <button data-target="login-password" id="toggle-pwd" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-on-surface rounded-md transition-colors">
+            <span class="material-symbols-outlined text-[18px]">visibility</span>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary-container transition-all active:scale-[0.98]">
+        <span>Iniciar Sesión</span>
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </button>
+      <div class="pt-1 text-center font-body-sm text-body-sm text-on-surface-variant">
+        ¿No tenés cuenta? <a class="text-primary font-semibold hover:underline" href="{{ url_for('register') }}">Registrate</a>
+      </div>
+    </form>
+  </div>
+  <p class="text-center mt-4 font-label-sm text-label-sm text-outline">Demo: usuario <span class="font-semibold text-on-surface-variant">sofia</span> · contraseña <span class="font-semibold text-on-surface-variant">demo1234</span></p>
+</div>
+{% endblock %}

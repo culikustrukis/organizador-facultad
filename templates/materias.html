@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Materias · Organizador Facultad{% endblock %}
+{% block breadcrumb %}Panel Académico{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full gap-6 max-w-7xl mx-auto">
+
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md mb-1">
+        <span>Ciclo Lectivo 2026</span>
+        <span>•</span>
+        <span class="text-primary font-semibold">1° Cuatrimestre</span>
+      </div>
+      <h1 class="text-2xl lg:text-[28px] font-bold text-on-surface tracking-tight">Materias del Cuatrimestre</h1>
+      <p class="text-sm text-on-surface-variant mt-0.5">Control de cursada, régimen de correlatividades y carga horaria semanal</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-space-sm">
+      <div class="flex items-center bg-surface-container-lowest px-3 py-2 rounded-lg shadow-sm border border-outline-variant/30">
+        <span class="material-symbols-outlined text-outline text-[18px] mr-2">search</span>
+        <input id="search-materia" class="bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none w-48 xl:w-64" placeholder="Buscar materia o docente..." type="text">
+      </div>
+      <div class="relative">
+        <select id="filter-estado" class="appearance-none bg-surface-container-lowest text-on-surface font-label-md text-label-md pl-3 pr-8 py-2 rounded-lg shadow-sm border border-outline-variant/30 cursor-pointer focus:outline-none">
+          <option value="todas">Estado: Todas</option>
+          <option value="promocionable">Promocionables</option>
+          <option value="con_final">Con final</option>
+        </select>
+        <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">expand_more</span>
+      </div>
+      <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary transition-all cursor-pointer" id="openModalBtn" type="button">
+        <span class="material-symbols-outlined text-[18px]">add_circle</span>
+        <span>+ Agregar materia</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total Materias</span>
+        <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">{{ materias | length }} Cursadas</p>
+        <span class="font-label-sm text-label-sm text-primary font-semibold">{{ total_horas }} hs reloj semanales</span>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-[24px]">school</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Régimen</span>
+        <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">{{ promocionales }} Promocionales</p>
+        <span class="font-label-sm text-label-sm text-tertiary font-semibold">{{ materias | length - promocionales }} con final obligatorio</span>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary">
+        <span class="material-symbols-outlined text-[24px]">workspace_premium</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Asistencia Global</span>
+        <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">92.4%</p>
+        <span class="font-label-sm text-label-sm text-on-surface-variant">Requisito mín. 75%</span>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-surface-container flex items-center justify-center text-on-surface">
+        <svg class="w-7 h-7" viewbox="0 0 36 36">
+          <path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+          <path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="92, 100" stroke-linecap="round" stroke-width="3.5"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Próximo Parcial</span>
+        <p class="font-headline-lg text-headline-lg text-on-surface font-bold mt-1">{{ 'En ' ~ prox_examen['dias_restantes'] ~ ' días' if prox_examen else 'Sin fechas' }}</p>
+        <span class="font-label-sm text-label-sm {% if prox_examen %}text-error{% else %}text-on-surface-variant{% endif %} font-semibold">{{ prox_examen['materia_nombre'] + ' (' + prox_examen['nombre'] + ')' if prox_examen else 'Cargá exámenes' }}</span>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-error-container flex items-center justify-center text-on-error-container">
+        <span class="material-symbols-outlined text-[24px]">event_upcoming</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <div class="px-space-lg py-space-md flex items-center justify-between bg-surface-container-low/40">
+      <div class="flex items-center gap-space-sm">
+        <span class="font-headline-sm text-headline-sm text-on-surface">Asignaturas Inscriptas</span>
+        <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">{{ materias | length }} activas</span>
+      </div>
+      <div class="flex items-center gap-space-xs text-outline font-label-sm text-label-sm">
+        <span class="material-symbols-outlined text-[16px]">swap_vert</span>
+        <span>Orden: Nombre</span>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left min-w-[900px]">
+        <thead>
+          <tr class="bg-surface-container-low/80 text-on-surface-variant font-label-md text-label-md">
+            <th class="py-3 px-4">Materia</th>
+            <th class="py-3 px-4">Profesor</th>
+            <th class="py-3 px-4">Modalidad</th>
+            <th class="py-3 px-4">Carga</th>
+            <th class="py-3 px-4">Aula &amp; Comisión</th>
+            <th class="py-3 px-4">Estado</th>
+            <th class="py-3 px-4 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-materias">
+          {% for m in materias %}
+          <tr class="hover:bg-surface-container-low/30 transition-colors border-t border-outline-variant/10" data-nombre="{{ m['nombre'] | lower }}" data-profesor="{{ m['profesor'] | lower }}" data-estado="{{ m['regimen'] }}">
+            <td class="py-4 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-1.5 h-10 rounded-full {{ m['color']['dot'] if m['color']['dot'].startswith('bg-[#') else 'bg-primary' }}"></div>
+                <div class="min-w-0">
+                  <span class="font-label-sm text-label-sm {{ m['color']['text'] }} font-bold tracking-wide">{{ m['codigo'] or 'S/C' }}</span>
+                  <p class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-snug">{{ m['nombre'] }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-4 font-body-md text-body-md text-on-surface">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-outline text-[18px]">account_circle</span>
+                <span>{{ m['profesor'] or '—' }}</span>
+              </div>
+            </td>
+            <td class="py-4 px-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">
+                <span class="w-1.5 h-1.5 rounded-full {{ m['color']['dot'] if m['color']['dot'].startswith('bg-[#') else 'bg-primary' }}"></span>
+                {{ m['modalidad_label'] }}
+              </span>
+            </td>
+            <td class="py-4 px-4 font-body-sm text-body-sm text-on-surface-variant font-medium">{{ m['horas_semana'] }} hs/sem</td>
+            <td class="py-4 px-4">
+              <div class="flex flex-col">
+                <span class="font-body-sm text-body-sm font-semibold text-on-surface">{{ m['aula'] or '—' }}</span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">{{ ('Comisión ' ~ m['comision']) if m['comision'] else '' }}</span>
+              </div>
+            </td>
+            <td class="py-4 px-4">
+              {% if m['regimen'] in ('promocionable', 'promocional') %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+                <span class="material-symbols-outlined text-[14px]">verified</span>{{ m['regimen_label'] }}
+              </span>
+              {% else %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+                <span class="material-symbols-outlined text-[14px]">timelapse</span>{{ m['regimen_label'] }}
+              </span>
+              {% endif %}
+            </td>
+            <td class="py-4 px-4 text-right">
+              <div class="inline-flex items-center gap-1 text-outline">
+                <a class="p-1.5 hover:text-primary hover:bg-surface-container rounded-md transition-colors" title="Horarios" href="{{ url_for('horario') }}"><span class="material-symbols-outlined text-[18px]">schedule</span></a>
+                <button class="p-1.5 hover:text-primary hover:bg-surface-container rounded-md transition-colors" title="Editar" data-edit-materia="{{ m['id'] }}"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+                <button class="p-1.5 hover:text-error hover:bg-error-container rounded-md transition-colors" title="Eliminar" data-delete-materia="{{ m['id'] }}"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="py-10 text-center font-body-sm text-body-sm text-on-surface-variant">No cargaste materias todavía. Hacé clic en "+ Agregar materia".</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 hidden" id="modal-materia">
+  <div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-md border border-outline-variant/30 flex flex-col overflow-hidden animate-fade-in">
+    <div class="flex items-center justify-between px-space-lg py-space-md border-b border-outline-variant/20 bg-surface-container-low/30">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">menu_book</span></div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight" id="modalMateriaTitle">Nueva materia</h3>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Completá los datos académicos de la cursada</p>
+        </div>
+      </div>
+      <button aria-label="Cerrar modal" class="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container transition-colors" data-close-modal="modal-materia" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+    <form class="flex flex-col gap-space-md p-space-lg" id="form-materia">
+      <input type="hidden" name="id" id="materia_id">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-codigo">Código</label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-codigo" name="codigo" placeholder="AED-204">
+        </div>
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-nombre">Nombre <span class="text-error">*</span></label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-nombre" name="nombre" placeholder="Ej: Algoritmos y Estructuras" required>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-profesor">Profesor / Cátedra</label>
+        <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-profesor" name="profesor" placeholder="Ej: Dra. Elena Valenzuela">
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface">Modalidad de cursada</label>
+        <div class="grid grid-cols-3 gap-1.5">
+          <label class="flex items-center justify-center gap-1 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-lg text-[13px] font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+            <input class="hidden" type="radio" name="modalidad" value="presencial" checked><span class="material-symbols-outlined text-[16px]">location_city</span>Presencial
+          </label>
+          <label class="flex items-center justify-center gap-1 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-lg text-[13px] font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+            <input class="hidden" type="radio" name="modalidad" value="hibrida"><span class="material-symbols-outlined text-[16px]">sync_alt</span>Híbrida
+          </label>
+          <label class="flex items-center justify-center gap-1 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-lg text-[13px] font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+            <input class="hidden" type="radio" name="modalidad" value="virtual"><span class="material-symbols-outlined text-[16px]">laptop_mac</span>Virtual
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-horas">Carga horaria (hs/semana)</label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-horas" name="horas_semana" type="number" min="1" max="30" value="4">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-regimen">Régimen</label>
+          <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-regimen" name="regimen">
+            <option value="promocionable">Promocionable</option>
+            <option value="promocional">Promocional directa</option>
+            <option value="con.final">Con final</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-aula">Aula / Lugar habitual</label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-aula" name="aula" placeholder="Ej: Aula 304 • Pabellón I">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="materia-comision">Comisión</label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="materia-comision" name="comision" placeholder="K3021">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface">Color de identificación</label>
+        <div class="grid grid-cols-6 gap-2" id="color-picker">
+          {% for key, c in COLORS.items() %}
+          <label class="flex items-center justify-center h-10 rounded-lg cursor-pointer border-2 transition-all" style="background:{{ c['light'] }}; border-color:{{ c['border_hex'] }};" title="{{ c['name'] }}">
+            <input class="hidden" type="radio" name="color" value="{{ key }}">
+            <span class="w-5 h-5 rounded-full" style="background:{{ c['hex'] }};"></span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
+        <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-materia" type="button">Cancelar</button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar materia</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const MATERIAS_DATA = {{ materias_json | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/materias.js') }}"></script>
+{% endblock %}

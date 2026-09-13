@@ -1,0 +1,65 @@
+{% extends "auth_base.html" %}
+{% block title %}Crear Cuenta · Organizador Facultad{% endblock %}
+{% block content %}
+<div class="w-full max-w-md">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-[0_1px_8px_rgba(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden">
+    <div class="p-8 flex flex-col items-center text-center gap-2 border-b border-outline-variant/20 bg-gradient-to-b from-surface-container-low/60 to-transparent">
+      <div class="w-14 h-14 rounded-2xl bg-primary-container/15 flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-[28px]">person_add</span>
+      </div>
+      <h1 class="font-headline-xl text-[26px] text-on-surface font-bold tracking-tight">Crear Cuenta</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">Completá tus datos para empezar a organizar tu facultad</p>
+    </div>
+
+    <form id="register-form" class="p-8 flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-md text-label-md text-on-surface font-semibold" for="reg-fullname">Nombre completo</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">badge</span>
+          <input id="reg-fullname" autocomplete="name" class="w-full h-11 pl-10 pr-4 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Tu nombre, ej: Sofía Martínez" type="text">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-md text-label-md text-on-surface font-semibold" for="reg-email">Correo electrónico</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span>
+          <input id="reg-email" autocomplete="email" class="w-full h-11 pl-10 pr-4 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="correo@ejemplo.com" type="email">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="font-label-md text-label-md text-on-surface font-semibold" for="reg-user">Nombre de usuario</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">person</span>
+          <input id="reg-user" autocomplete="username" class="w-full h-11 pl-10 pr-4 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Elegí un usuario" required type="text">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-md text-label-md text-on-surface font-semibold" for="reg-password">Contraseña</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">lock</span>
+            <input id="reg-password" autocomplete="new-password" class="w-full h-11 pl-10 pr-11 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Mínimo 6 caracteres" required type="password">
+            <button data-target="reg-password" id="toggle-reg-pwd" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-on-surface rounded-md transition-colors">
+              <span class="material-symbols-outlined text-[18px]">visibility</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="font-label-md text-label-md text-on-surface font-semibold" for="reg-confirm">Confirmar contraseña</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">lock_reset</span>
+            <input id="reg-confirm" autocomplete="new-password" class="w-full h-11 pl-10 pr-4 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Repetí tu contraseña" required type="password">
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary-container transition-all active:scale-[0.98]">
+        <span>Crear Cuenta</span>
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </button>
+      <div class="pt-1 text-center font-body-sm text-body-sm text-on-surface-variant">
+        ¿Ya tenés cuenta? <a class="text-primary font-semibold hover:underline" href="{{ url_for('login') }}">Iniciar sesión</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

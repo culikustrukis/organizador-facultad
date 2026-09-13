@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if current_user and current_user['theme'] == 'dark' %}dark{% endif %}">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>{% block title %}Organizador Facultad{% endblock %}</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between border-r border-outline-variant/30">
+  <div class="flex flex-col">
+    <div class="h-16 px-space-lg flex items-center justify-between border-b border-outline-variant/20">
+      <a class="flex items-center gap-space-sm" href="{{ url_for('dashboard') }}">
+        <img alt="Organizador Facultad Logo" class="h-8 w-auto object-contain" src="{{ url_for('static', filename='img/logo.svg') }}">
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight">Organizador</span>
+          <span class="font-label-sm text-[11px] text-on-surface-variant leading-tight">Facultad</span>
+        </div>
+      </a>
+      <span class="px-space-sm py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-[11px] font-semibold tracking-wide">2026</span>
+    </div>
+    <div class="px-space-md py-space-lg">
+      <div class="px-space-sm pb-space-xs font-label-sm text-[11px] text-outline uppercase tracking-wider font-semibold">Navegación</div>
+      <nav class="flex flex-col gap-1">
+        <a class="flex items-center justify-between px-space-md py-2.5 rounded-lg {% if active == 'inicio' %}bg-primary-container text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors{% endif %}" href="{{ url_for('dashboard') }}">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-body-md text-[14px]">Inicio</span></div>
+        </a>
+        <a class="flex items-center justify-between px-space-md py-2.5 rounded-lg {% if active == 'mi-horario' %}bg-primary-container text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors{% endif %}" href="{{ url_for('horario') }}">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">calendar_today</span><span class="font-body-md text-[14px]">Mi horario</span></div>
+        </a>
+        <a class="flex items-center justify-between px-space-md py-2.5 rounded-lg {% if active == 'materias' %}bg-primary-container text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors{% endif %}" href="{{ url_for('materias') }}">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="font-body-md text-[14px]">Materias</span></div>
+        </a>
+        <a class="flex items-center justify-between px-space-md py-2.5 rounded-lg {% if active == 'tareas' %}bg-primary-container text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors{% endif %}" href="{{ url_for('tareas') }}">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">checklist</span><span class="font-body-md text-[14px]">Tareas</span></div>
+          {% if pending_count %}<span class="w-5 h-5 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold">{{ pending_count }}</span>{% endif %}
+        </a>
+        <a class="flex items-center justify-between px-space-md py-2.5 rounded-lg {% if active == 'parciales' %}bg-primary-container text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors{% endif %}" href="{{ url_for('parciales') }}">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">notification_important</span><span class="font-body-md text-[14px]">Parciales</span></div>
+          {% if exam_count %}<span class="w-5 h-5 flex items-center justify-center rounded-full bg-error-container text-on-error-container font-label-sm text-[11px] font-bold">{{ exam_count }}</span>{% endif %}
+        </a>
+        <a class="flex items-center justify-between px-space-md py-2.5 rounded-lg {% if active == 'configuracion' %}bg-primary-container text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors{% endif %}" href="{{ url_for('configuracion') }}">
+          <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-body-md text-[14px]">Configuración</span></div>
+        </a>
+      </nav>
+    </div>
+  </div>
+  <div class="p-space-md border-t border-outline-variant/20 bg-surface-container-low/40">
+    <a class="flex items-center justify-between p-space-xs rounded-lg hover:bg-surface-container transition-colors" href="{{ url_for('configuracion') }}">
+      <div class="flex items-center gap-space-sm min-w-0">
+        {% if current_user and current_user['avatar'] %}
+        <img alt="Profile" class="w-9 h-9 rounded-full object-cover ring-1 ring-outline-variant/50 flex-shrink-0" src="{{ url_for('static', filename='uploads/' ~ current_user['avatar']) }}">
+        {% else %}
+        <img alt="Profile" class="w-9 h-9 rounded-full object-cover ring-1 ring-outline-variant/50 flex-shrink-0" src="{{ url_for('static', filename='img/avatar.svg') }}">
+        {% endif %}
+        <div class="flex flex-col min-w-0">
+          <span class="font-label-lg text-[14px] text-on-surface truncate font-semibold">{{ current_user['full_name'] or current_user['username'] }}</span>
+          <span class="font-label-sm text-[11px] text-on-surface-variant truncate">{{ (current_user['carrera'] or 'Cursada').split('(')[0] | trim }}</span>
+        </div>
+      </div>
+      <span class="material-symbols-outlined text-[20px] text-on-surface-variant">more_vert</span>
+    </a>
+  </div>
+</aside>
+
+<div class="pl-64">
+  <header class="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-md shadow-[0_1px_4px_rgba(0,0,0,0.03)] z-40 flex items-center justify-between px-space-xl border-b border-outline-variant/25">
+    <div class="flex items-center gap-space-md">
+      <div class="flex items-center gap-space-xs font-label-md text-on-surface-variant text-[13px]">
+        <span class="hover:text-on-surface transition-colors cursor-pointer">Campus Central</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-on-surface font-semibold">{% block breadcrumb %}Panel Académico{% endblock %}</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-space-md">
+      {% block header_actions %}
+      {% if add_link %}
+      <a class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary text-on-primary font-label-md text-[13px] hover:bg-primary-container transition-colors shadow-sm font-medium" href="{{ add_link }}">
+        <span class="material-symbols-outlined text-[16px]">add</span>
+        <span>Agregar</span>
+      </a>
+      {% endif %}
+      {% endblock %}
+      <button aria-label="Cambiar tema" id="theme-toggle" class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button">
+        <span class="material-symbols-outlined text-[20px]">{% if current_user and current_user['theme'] == 'dark' %}light_mode{% else %}dark_mode{% endif %}</span>
+      </button>
+      <button aria-label="Notificaciones" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button">
+        <span class="material-symbols-outlined text-[20px]">notifications</span>
+      </button>
+      <div class="h-5 w-[1px] bg-outline-variant/40"></div>
+      <a class="flex items-center gap-space-xs cursor-pointer group" href="{{ url_for('configuracion') }}" title="Cerrar sesión con {{ current_user['username'] }}">
+        {% if current_user and current_user['avatar'] %}
+        <img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/50" src="{{ url_for('static', filename='uploads/' ~ current_user['avatar']) }}">
+        {% else %}
+        <img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/50" src="{{ url_for('static', filename='img/avatar.svg') }}">
+        {% endif %}
+      </a>
+      <a href="{{ url_for('logout') }}" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Cerrar sesión">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="w-full pt-20 px-8 pb-10 min-h-screen flex flex-col gap-6">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

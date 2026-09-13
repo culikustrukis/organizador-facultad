@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Tareas · Organizador Facultad{% endblock %}
+{% block breadcrumb %}Panel Académico{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full gap-6 max-w-7xl mx-auto">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl lg:text-[28px] font-bold text-on-surface tracking-tight">Tareas y Trabajos Prácticos</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Gestioná entregas, lecturas y trabajos prácticos por materia</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="inline-flex p-1 bg-surface-container-high/60 rounded-xl border border-outline-variant/30">
+        <button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm transition-all" id="btn-view-list" type="button">
+          <span class="material-symbols-outlined text-[16px]">view_list</span>Lista
+        </button>
+        <button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:text-on-surface transition-all" id="btn-view-kanban" type="button">
+          <span class="material-symbols-outlined text-[16px]">view_kanban</span>Kanban
+        </button>
+      </div>
+      <button class="inline-flex items-center gap-2 h-9 px-space-lg rounded-xl bg-primary text-on-primary font-label-lg text-[13px] hover:bg-primary-container transition-all shadow-md active:scale-95" id="btnNuevaTarea" type="button">
+        <span class="material-symbols-outlined text-[18px]">add_task</span>Nueva Tarea
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <div class="inline-flex p-1 bg-surface-container-low rounded-xl gap-1" id="filtros">
+      <button class="filter-tab px-space-md py-1.5 rounded-lg bg-surface-container-high text-primary font-label-md text-label-md font-semibold transition-colors" data-filter="all">Todas ({{ tareas | length }})</button>
+      <button class="filter-tab px-space-md py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md text-label-md transition-colors" data-filter="pending">Pendientes ({{ pendientes_count }})</button>
+      <button class="filter-tab px-space-md py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md text-label-md transition-colors" data-filter="urgent">Urgentes ({{ urgente_count }})</button>
+      <button class="filter-tab px-space-md py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md text-label-md transition-colors" data-filter="done">Completadas</button>
+    </div>
+    <div class="relative w-full sm:w-72">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+      <input class="w-full h-9 pl-9 pr-4 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container transition-colors" id="task-search" placeholder="Filtrar por TP, materia o pauta..." type="text">
+    </div>
+  </div>
+
+  {% if vencieron_count %}
+  <div class="rounded-2xl bg-error-container/40 border border-error/20 p-4 flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-error">schedule</span>
+    <p class="font-body-sm text-body-sm text-on-surface">Tenés <span class="font-bold">{{ vencieron_count }}</span> tarea{{ 's' if vencieron_count != 1 }} vencida{{ 's' if vencieron_count != 1 }}. Capaz conviene re-programarlas 📅</p>
+  </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-space-md" id="view-list">
+    {% for t in tareas %}
+    <div class="group flex items-start gap-space-md p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/25 shadow-xs transition-all hover:shadow-sm hover:border-outline-variant/50 task-row" data-id="{{ t['id'] }}" data-estado="{{ t['estado'] }}" data-prioridad="{{ t['prioridad'] }}" data-busqueda="{{ (t['titulo'] ~ ' ' ~ (t['materia_nombre'] or '') ~ ' ' ~ (t['descripcion'] or '')) | lower }}">
+      <button class="mt-1 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-colors {% if t['estado'] == 'completada' %}bg-primary text-on-primary{% else %}bg-surface-container-highest text-transparent hover:text-primary{% endif %}" data-toggle-tarea="{{ t['id'] }}" title="{{ 'Marcar como pendiente' if t['estado'] == 'completada' else 'Marcar como completada' }}">
+        <span class="material-symbols-outlined text-[15px]">check</span>
+      </button>
+      <div class="flex flex-col min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="font-headline-sm text-headline-sm {% if t['estado'] == 'completada' %}text-on-surface-variant line-through{% endif %} font-semibold leading-snug">{{ t['titulo'] }}</h2>
+          {% if t['estado'] == 'pendiente' %}
+            {% if t.get('vencida') %}
+            <span class="px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Vencida ({{ t['fecha_display'] }})</span>
+            {% elif t.get('para_hoy') %}
+            <span class="px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Hoy {{ t['fecha_display'] }}</span>
+            {% elif t.get('fecha_display') %}
+            <span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">{{ t['fecha_display'] }}</span>
+            {% endif %}
+          {% else %}
+          <span class="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-label-sm text-label-sm font-semibold">Completada</span>
+          {% endif %}
+        </div>
+        {% if t['descripcion'] %}<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">{{ t['descripcion'] }}</p>{% endif %}
+        <div class="flex flex-wrap items-center gap-2 mt-1.5">
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full {% if t['prioridad'] == 'alta' %}bg-error-container text-on-error-container{% elif t['prioridad'] == 'media' %}bg-secondary-fixed text-on-secondary-fixed{% else %}bg-surface-container text-on-surface-variant{% endif %} font-label-sm text-label-sm font-medium">
+            <span class="w-1.5 h-1.5 rounded-full {% if t['prioridad'] == 'alta' %}bg-error{% elif t['prioridad'] == 'media' %}bg-secondary{% else %}bg-outline{% endif %}"></span>{{ t['prioridad_label'] }}
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            <span class="w-1.5 h-1.5 rounded-full {{ t['color']['dot'] if t['color']['dot'].startswith('bg-[#') else 'bg-primary' }}"></span>{{ t['materia_nombre'] or 'Sin materia' }}
+          </span>
+          <span class="inline-flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+            <span class="material-symbols-outlined text-[14px]">{{ 'groups' if t['tipo_entrega'] == 'grupal' else 'person' }}</span>{{ 'Grupal' if t['tipo_entrega'] == 'grupal' else 'Individual' }}
+          </span>
+        </div>
+      </div>
+      <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Editar tarea" data-edit-tarea="{{ t['id'] }}"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+        <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="Eliminar" data-delete-tarea="{{ t['id'] }}"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+      </div>
+    </div>
+    {% else %}
+    <div class="py-12 rounded-2xl bg-surface-container-lowest border border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-2 text-center">
+      <span class="material-symbols-outlined text-[40px] text-outline">task_alt</span>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">No tenés tareas cargadas. ¡Creá la primera!</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="hidden grid grid-cols-1 md:grid-cols-4 gap-space-lg items-start" id="view-kanban">
+    {% set columnas = [('urgente', 'Urgente', 'bg-error-container/60 text-on-error-container'), ('media', 'En curso', 'bg-secondary-fixed/70 text-on-secondary-fixed'), ('baja', 'Programadas', 'bg-surface-container/70 text-on-surface-variant'), ('done', 'Completadas', 'bg-emerald-50 text-emerald-700')] %}
+    {% for ckey, clabel, chipcls in columnas %}
+    <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/20 p-3 flex flex-col gap-2 kanban-col" data-kcol="{{ ckey }}">
+      <div class="flex items-center justify-between px-1">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full {{ chipcls }} font-label-sm text-label-sm font-semibold">{{ clabel }}</span>
+        <span class="font-label-sm text-label-sm text-outline kanban-count">0</span>
+      </div>
+      <div class="flex flex-col gap-2 kanban-cards">
+      {% for t in tareas %}
+        {% set categorias = namespace(es_urgente=false, es_media=false, es_baja=false, es_done=false) %}
+        {% if t['estado'] == 'completada' %}{% set categorias.es_done = true %}
+        {% elif t['estado'] == 'pendiente' and (t['prioridad'] == 'alta' or t.get('para_hoy') or t.get('vencida')) %}{% set categorias.es_urgente = true %}
+        {% elif t['estado'] == 'pendiente' and t['prioridad'] == 'media' %}{% set categorias.es_media = true %}
+        {% elif t['estado'] == 'pendiente' %}{% set categorias.es_baja = true %}
+        {% endif %}
+        {% if (ckey == 'urgente' and categorias.es_urgente) or (ckey == 'media' and categorias.es_media) or (ckey == 'baja' and categorias.es_baja) or (ckey == 'done' and categorias.es_done) %}
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/25 p-3 shadow-xs flex flex-col gap-1.5 kanban-card" data-estado="{{ t['estado'] }}">
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="font-label-lg text-label-lg font-semibold text-on-surface leading-snug {% if t['estado'] == 'completada' %}line-through text-on-surface-variant{% endif %}">{{ t['titulo'] }}</h3>
+            <button class="p-0.5 text-on-surface-variant hover:text-error rounded transition-colors flex-shrink-0" data-delete-tarea="{{ t['id'] }}"><span class="material-symbols-outlined text-[16px]">close</span></button>
+          </div>
+          <span class="inline-flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+            <span class="w-1.5 h-1.5 rounded-full {{ t['color']['dot'] if t['color']['dot'].startswith('bg-[#') else 'bg-primary' }}"></span>{{ t['materia_nombre'] or 'Sin materia' }}
+          </span>
+          {% if t.get('fecha_display') and t['estado'] == 'pendiente' %}
+          <span class="font-label-sm text-label-sm {% if t.get('vencida') %}text-error font-semibold{% else %}text-outline{% endif %}">{{ 'Vencida' if t.get('vencida') else 'Entrega' }}: {{ t['fecha_display'] }}</span>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 hidden" id="modal-tarea">
+  <div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-md border border-outline-variant/30 flex flex-col overflow-hidden animate-fade-in">
+    <div class="flex items-center justify-between px-space-lg py-space-md border-b border-outline-variant/20 bg-surface-container-low/30">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">add_task</span></div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight" id="modalTareaTitle">Nueva Tarea o TP</h3>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Completá los datos académicos de la entrega</p>
+        </div>
+      </div>
+      <button aria-label="Cerrar modal" class="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container transition-colors" data-close-modal="modal-tarea" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+    <form class="flex flex-col gap-space-md p-space-lg" id="form-tarea">
+      <input type="hidden" name="id" id="tarea_id">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="task-title">Nombre o título del trabajo <span class="text-error">*</span></label>
+        <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="task-title" name="titulo" placeholder="Ej: TP Nº 3: Balanceo de Carga y Microservicios" required>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="task-subject">Materia <span class="text-error">*</span></label>
+          <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="task-subject" name="materia_id" required>
+            <option value="">Seleccionar materia...</option>
+            {% for m in materias_select %}<option value="{{ m['id'] }}">{{ m['nombre'] }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="task-deadline">Fecha y hora límite <span class="text-error">*</span></label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="task-deadline" name="fecha_limite" type="datetime-local" required>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface">Prioridad</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <label class="flex items-center justify-center gap-1 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-sm font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+              <input class="hidden" type="radio" name="prioridad" value="baja"><span class="w-2 h-2 rounded-full bg-outline"></span>Baja
+            </label>
+            <label class="flex items-center justify-center gap-1 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-sm font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+              <input class="hidden" checked type="radio" name="prioridad" value="media"><span class="w-2 h-2 rounded-full bg-secondary"></span>Media
+            </label>
+            <label class="flex items-center justify-center gap-1 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-sm font-medium transition-colors has-[:checked]:bg-error-container has-[:checked]:border-error has-[:checked]:text-on-error-container">
+              <input class="hidden" type="radio" name="prioridad" value="alta"><span class="w-2 h-2 rounded-full bg-error"></span>Alta
+            </label>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface">Modalidad de entrega</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <label class="flex items-center justify-center gap-1.5 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-sm font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+              <input class="hidden" checked type="radio" name="tipo_entrega" value="individual"><span class="material-symbols-outlined text-[16px]">person</span>Individual
+            </label>
+            <label class="flex items-center justify-center gap-1.5 h-9 rounded-lg border border-outline-variant/40 bg-surface-container-low cursor-pointer hover:bg-surface-container text-label-sm font-medium transition-colors has-[:checked]:bg-surface-container-highest has-[:checked]:border-primary has-[:checked]:text-primary">
+              <input class="hidden" type="radio" name="tipo_entrega" value="grupal"><span class="material-symbols-outlined text-[16px]">groups</span>Grupal
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="task-notes">Pautas o notas breves</label>
+        <textarea class="w-full h-20 px-3 py-2 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors resize-none" id="task-notes" name="descripcion" placeholder="Ej: Subir en formato PDF con portada oficial y diagrama adjunto..."></textarea>
+      </div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
+        <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-tarea" type="button">Cancelar</button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar tarea</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const TAREAS_DATA = {{ tareas_json | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/tareas.js') }}"></script>
+{% endblock %}

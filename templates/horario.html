@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Mi Horario · Organizador Facultad{% endblock %}
+{% block breadcrumb %}Panel Académico{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full gap-6">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl lg:text-[26px] font-bold text-on-surface tracking-tight" id="pageTitle">Mi Horario Semanal</h1>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-primary font-medium text-xs" id="pageBadge">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          {{ total_horas }} hs semanales • Lunes a Viernes
+        </span>
+      </div>
+      <p class="text-sm text-on-surface-variant mt-1">1° Cuatrimestre 2026 • Cursada regular</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="inline-flex p-1 bg-surface-container-high/60 rounded-xl border border-outline-variant/30">
+        <button class="px-3.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-semibold text-xs shadow-xs transition-all" id="btnVistaSemanal" type="button">Vista Semanal</button>
+        <button class="px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-medium text-xs transition-colors" id="btnVistaLista" type="button">Lista por Materia</button>
+      </div>
+      <button class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-outline-variant/50 bg-surface-container-lowest text-on-surface hover:bg-surface-container text-xs font-medium transition-colors" title="Imprimir calendario" onclick="window.print();" type="button">
+        <span class="material-symbols-outlined text-[17px] text-outline">print</span>
+        <span>Imprimir</span>
+      </button>
+    </div>
+  </div>
+
+  {% if conflicts %}
+  <div class="rounded-2xl bg-error-container/40 border border-error/20 p-4 flex items-start gap-3 animate-fade-in">
+    <div class="w-9 h-9 rounded-xl bg-error-container text-on-error-container flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-[20px]">warning</span>
+    </div>
+    <div class="flex-1">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Conflictos de horario detectados ({{ conflicts | length }})</h3>
+        <span class="font-label-sm text-label-sm text-on-error-container bg-error-container px-2 py-0.5 rounded-full font-semibold">Revisar</span>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Hay clases que se superponen el mismo día. Corregilas desde el editor de horarios para evitar traslapes.</p>
+      <ul class="mt-2 flex flex-col gap-1">
+        {% for cf in conflicts %}
+        <li class="font-body-sm text-body-sm text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px] text-error">priority_high</span>
+          {{ cf['dia_nombre'] }}: <span class="font-semibold">{{ cf['a_nombre'] }}</span> ({{ cf['a_horario'] }}) ↔ <span class="font-semibold">{{ cf['b_nombre'] }}</span> ({{ cf['b_horario'] }})
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4.5 transition-opacity duration-150" id="vistaSemanal">
+    {% for d in dias %}
+    <div class="flex flex-col rounded-2xl bg-surface-container-lowest border {% if d['es_hoy'] %}border-2 border-primary/40 shadow-sm{% else %}border-outline-variant/35 shadow-xs{% endif %} overflow-hidden">
+      <div class="px-4 py-3.5 border-b {% if d['es_hoy'] %}border-primary/20 bg-primary-fixed/25{% else %}border-outline-variant/25 bg-surface-container-low/50{% endif %} flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider {% if d['es_hoy'] %}text-primary{% else %}text-on-surface{% endif %}">{{ d['nombre'] }}</span>
+          {% if d['es_hoy'] %}<span class="px-1.5 py-0.2 rounded bg-primary text-on-primary text-[10px] font-bold">HOY</span>{% else %}<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>{% endif %}
+          <span class="text-xs text-on-surface-variant">{{ d['clases'] | length }} clase{{ 's' if d['clases'] | length != 1 }}</span>
+        </div>
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">{{ d['total_min'] // 60 }} hrs</span>
+      </div>
+      <div class="p-3.5 flex flex-col gap-3 flex-1">
+        {% for c in d['clases'] %}
+        <div class="group relative rounded-xl p-3.5 {{ c['color']['bg'] }} border {{ c['color']['border'] }} {% if c['id'] in conflicted_ids %}ring-2 ring-error/50 border-error/40{% endif %} transition-all hover:shadow-sm">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold {{ c['color']['text'] }}">
+              <span class="material-symbols-outlined text-[13px]">schedule</span>
+              {{ c['hora_inicio'] }} - {{ c['hora_fin'] }} hs
+            </span>
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold {{ c['color']['soft'] }} {{ c['color']['text'] }}">{{ c['tipo_label'] }}</span>
+          </div>
+          <h3 class="font-bold text-sm text-on-surface leading-snug">{{ c['materia_nombre'] }}</h3>
+          {% if c['id'] in conflicted_ids %}
+          <div class="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-error bg-error-container px-1.5 py-0.5 rounded">
+            <span class="material-symbols-outlined text-[12px]">warning</span> Se superpone
+          </div>
+          {% endif %}
+          <div class="mt-2.5 pt-2.5 border-t {{ c['color']['border'] }}/60 flex flex-col gap-1 text-xs text-on-surface-variant">
+            {% if c['aula'] %}<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] {{ c['color']['text'] }}">location_on</span><span class="font-medium text-on-surface">{{ c['aula'] }}</span></div>{% endif %}
+            <div class="flex items-center gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[13px]">person</span><span>{{ c['materia_profesor'] | default('') or 'Prof. a confirmar' }}</span></div>
+          </div>
+          <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button class="p-1 rounded-md bg-surface-container-lowest shadow-sm text-on-surface-variant hover:text-primary" title="Editar clase" data-edit-clase="{{ c['id'] }}"><span class="material-symbols-outlined text-[15px]">edit</span></button>
+            <button class="p-1 rounded-md bg-surface-container-lowest shadow-sm text-on-surface-variant hover:text-error" title="Eliminar clase" data-delete-clase="{{ c['id'] }}"><span class="material-symbols-outlined text-[15px]">delete</span></button>
+          </div>
+        </div>
+        {% else %}
+        <div class="flex-1 min-h-[120px] rounded-xl border border-dashed border-outline-variant/30 flex items-center justify-center text-center p-4">
+          <span class="text-xs text-outline/70">Sin clases este día</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 transition-opacity duration-150" id="vistaLista">
+    {% for g in materias_grid %}
+    <div class="rounded-2xl bg-surface-container-lowest border border-outline-variant/35 shadow-xs overflow-hidden flex flex-col justify-between">
+      <div>
+        <div class="p-4 border-b border-outline-variant/20 bg-gradient-to-r from-surface-container-low/70 to-surface-container-lowest flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl {{ g['materia']['color']['soft'] }} {{ g['materia']['color']['text'] }} flex items-center justify-center font-bold text-base flex-shrink-0">
+              <span class="material-symbols-outlined text-[22px]">menu_book</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full {{ g['materia']['color']['soft'] }} {{ g['materia']['color']['text'] }}">{{ g['materia']['codigo'] or 'S/C' }}</span>
+                <span class="text-xs font-semibold text-on-surface-variant">{{ g['cant'] }} clase{{ 's' if g['cant'] != 1 }}</span>
+              </div>
+              <h3 class="font-bold text-base text-on-surface mt-1 truncate">{{ g['materia']['nombre'] }}</h3>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg text-xs font-bold {{ g['materia']['color']['bg'] }} {{ g['materia']['color']['text'] }} border {{ g['materia']['color']['border'] }} flex-shrink-0">{{ g['horas'] }} hs/sem</span>
+        </div>
+        <div class="p-4 flex flex-col gap-3">
+          <div class="text-[11px] font-bold text-outline uppercase tracking-wider">Horarios y comisiones</div>
+          {% for c in g['clases'] %}
+          <div class="p-3 rounded-xl bg-surface-container-low/50 border border-outline-variant/25 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full {{ g['materia']['color']['dot'] }}"></span>
+                <span class="text-xs font-bold text-on-surface">{{ DIAS[c['dia']][0] }}</span>
+                <span class="text-xs font-medium {{ g['materia']['color']['text'] }}">{{ c['hora_inicio'] }} - {{ c['hora_fin'] }} hs</span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold {{ g['materia']['color']['soft'] }} {{ g['materia']['color']['text'] }}">{{ c['tipo_label'] }}</span>
+            </div>
+            {% if c['aula'] or c['materia_profesor'] %}
+            <div class="flex items-center justify-between text-xs text-on-surface-variant pt-1 border-t border-outline-variant/15">
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px] {{ g['materia']['color']['text'] }}">location_on</span><span>{{ c['aula'] or 'Sin aula' }}</span></div>
+              <div class="flex items-center gap-1 text-[11px]"><span class="material-symbols-outlined text-[13px]">person</span><span>{{ c['materia_profesor'] | default('') or '—' }}</span></div>
+            </div>
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="py-5 px-3 rounded-xl border border-dashed border-outline-variant/30 flex items-center justify-center text-center">
+            <span class="text-[11px] text-outline/70">Sin comisiones asignadas</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="px-4 py-2.5 bg-surface-container-low/30 border-t border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
+        <span class="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-[11px]">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ g['materia']['regimen_label'] }}
+        </span>
+        <span class="text-on-surface-variant font-label-sm text-label-sm">{{ g['materia']['comision'] or '' }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/25 px-5 py-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-xs font-bold uppercase tracking-wider text-outline mr-2">Materias:</span>
+      {% for m in materias_select %}
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg {{ m['color']['bg'] }} border {{ m['color']['border'] }} {{ m['color']['text'] }} text-xs font-medium">
+        <span class="w-2 h-2 rounded-full {{ m['color']['dot'] }}"></span>
+        <span>{{ m['nombre'] }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="flex items-center gap-2 self-end lg:self-center">
+      <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors" id="btnNuevaClase" type="button">
+        <span class="material-symbols-outlined text-[16px] text-primary">add_circle</span>
+        <span>Añadir clase u horario</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 hidden" id="modal-clase">
+  <div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-md border border-outline-variant/30 flex flex-col overflow-hidden animate-fade-in">
+    <div class="flex items-center justify-between px-space-lg py-space-md border-b border-outline-variant/20 bg-surface-container-low/30">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">schedule</span></div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight" id="modalClaseTitle">Nueva clase u horario</h3>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Cargá la comisión y el bloque horario</p>
+        </div>
+      </div>
+      <button aria-label="Cerrar modal" class="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container transition-colors" data-close-modal="modal-clase" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+    <form class="flex flex-col gap-space-md p-space-lg" id="form-clase">
+      <input type="hidden" name="id" id="clase_id">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="clase-materia">Materia <span class="text-error">*</span></label>
+        <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="clase-materia" name="materia_id" required>
+          <option value="">Seleccionar materia...</option>
+          {% for m in materias_select %}<option value="{{ m['id'] }}">{{ m['nombre'] }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="clase-dia">Día <span class="text-error">*</span></label>
+          <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="clase-dia" name="dia" required>
+            <option value="0">Lunes</option>
+            <option value="1">Martes</option>
+            <option value="2">Miércoles</option>
+            <option value="3">Jueves</option>
+            <option value="4">Viernes</option>
+            <option value="5">Sábado</option>
+            <option value="6">Domingo</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="clase-tipo">Tipo de clase</label>
+          <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="clase-tipo" name="tipo">
+            {% for t in tipos_clase %}<option value="{{ t['value'] }}">{{ t['label'] }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="clase-inicio">Hora de inicio <span class="text-error">*</span></label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="clase-inicio" name="hora_inicio" type="time" value="08:00" required>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="clase-fin">Hora de fin <span class="text-error">*</span></label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="clase-fin" name="hora_fin" type="time" value="09:00" required>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="clase-aula">Aula / Lugar</label>
+        <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="clase-aula" name="aula" placeholder="Ej: Aula 302 • Pabellón 2">
+      </div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
+        <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-clase" type="button">Cancelar</button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar clase</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const CLASES_DATA = {{ clases_json | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/horario.js') }}"></script>
+{% endblock %}

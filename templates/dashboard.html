@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block title %}Inicio · Organizador Facultad{% endblock %}
+{% block breadcrumb %}Panel Académico{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full gap-space-xl max-w-7xl mx-auto">
+
+  <section class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+    <div class="flex flex-col gap-space-xs">
+      <div class="flex items-center gap-space-sm">
+        <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">¡Hola de nuevo, {{ (current_user['full_name'] or current_user['username']).split()[0] }}! 👋</h1>
+        <span class="px-space-sm py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">1° Cuatrimestre</span>
+      </div>
+      <p class="font-body-lg text-body-lg text-on-surface-variant">
+        Tenés <span class="text-primary font-semibold">{{ clases_hoy | length }} clase{{ 's' if clases_hoy | length != 1 }} hoy</span>
+        {% if para_hoy %} y <span class="text-error font-semibold">{{ para_hoy | length }} entrega{{ 's' if para_hoy | length != 1 }} pendiente{{ 's' if para_hoy | length != 1 }}</span>{% endif %}.
+      </p>
+    </div>
+    <div class="flex items-center gap-space-sm bg-surface-container-lowest p-1 rounded-xl shadow-sm">
+      <button type="button" disabled class="w-8 h-8 flex items-center justify-center rounded-lg text-outline/50" title="Semana anterior">
+        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+      </button>
+      <div class="flex items-center gap-2 px-space-sm py-1">
+        <span class="material-symbols-outlined text-primary text-[18px]">event</span>
+        <span class="font-label-lg text-label-lg text-on-surface font-semibold tracking-tight">Semana del {{ semana_labels[0]['numero'] }} al {{ semana_labels[4]['numero'] }}</span>
+      </div>
+      <button type="button" disabled class="w-8 h-8 flex items-center justify-center rounded-lg text-outline/50" title="Semana siguiente">
+        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+    <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-all group relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+      <div>
+        <div class="flex items-center justify-between gap-1 mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Próxima clase</span>
+          {% if proxima_clase %}
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full {{ proxima_clase['chip_clase'] }} font-label-sm text-label-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>{{ proxima_clase['chip'] }}
+          </span>
+          {% endif %}
+        </div>
+        {% if proxima_clase %}
+        <h2 class="font-headline-sm text-headline-sm text-on-surface line-clamp-1 group-hover:text-primary transition-colors">{{ proxima_clase['materia_nombre'] }}</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">{{ proxima_clase['hora_inicio'] }} hs • {{ proxima_clase['aula'] or 'Sin aula' }}</p>
+        {% else %}
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Sin clases hoy</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Aprovechá para adelantar tareas.</p>
+        {% endif %}
+      </div>
+      <div class="mt-space-md pt-space-xs flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-tertiary">schedule</span>{{ 'Hoy • ' + hoy_idioma_nombre if proxima_clase else 'Día libre' }}</span>
+        <a href="{{ url_for('horario') }}" class="material-symbols-outlined text-[18px] text-outline group-hover:translate-x-0.5 transition-transform">arrow_forward</a>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+      <div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Cursadas activas</span>
+          <div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ materias_count }}</span>
+          <span class="font-label-md text-label-md text-on-surface-variant">materias</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">{{ creditos }} créditos académicos en curso</p>
+      </div>
+      <div class="mt-space-md pt-space-xs flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-primary"></span>
+        <span class="w-2 h-2 rounded-full bg-secondary"></span>
+        <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+        <span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+        <span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+        <span class="font-label-sm text-label-sm text-outline ml-1 font-medium">100% al día</span>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+      <div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Carga semanal</span>
+          <div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[16px]">schedule</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ horas }}</span>
+          <span class="font-label-md text-label-md text-on-surface-variant">horas / semana</span>
+        </div>
+        <div class="w-full bg-surface-container rounded-full h-1.5 mt-3 overflow-hidden">
+          <div class="bg-primary h-full rounded-full transition-all duration-500" style="width: {{ [horas * 4, 100] | min }}%;"></div>
+        </div>
+      </div>
+      <div class="mt-space-md pt-space-xs flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+        <span>{{ horas_teoricas }}h teóricas</span>
+        <span class="text-outline">•</span>
+        <span>{{ horas_practicas }}h prácticas</span>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-secondary-container"></div>
+      <div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Próximo examen</span>
+          {% if prox_examen %}
+          <span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+            {{ 'Hoy' if prox_examen['dias_restantes'] == 0 else ('Mañana' if prox_examen['dias_restantes'] == 1 else 'En ' ~ prox_examen['dias_restantes'] ~ ' días') }}
+          </span>
+          {% endif %}
+        </div>
+        {% if prox_examen %}
+        <h2 class="font-headline-sm text-headline-sm text-on-surface line-clamp-1">{{ prox_examen['materia_nombre'] }}</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">{{ prox_examen['fecha'][:10][8:10] }}/{{ prox_examen['fecha'][:10][5:7] }} • {{ prox_examen['hora'] }} hs</p>
+        {% else %}
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Sin exámenes</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Cargá tus parciales para verlos acá.</p>
+        {% endif %}
+      </div>
+      <div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm text-secondary font-medium">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">assignment_turned_in</span> {{ prox_examen['categoria_label'] if prox_examen else '—' }}</span>
+        <a href="{{ url_for('parciales') }}" class="text-outline material-symbols-outlined text-[18px]">arrow_forward</a>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+      <div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Entregas activas</span>
+          <div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[16px]">checklist_rtl</span>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-headline-lg text-headline-lg text-on-surface font-bold">{{ total_pendientes }}</span>
+          <span class="font-label-md text-label-md text-on-surface-variant">pendientes</span>
+        </div>
+        {% if para_hoy %}
+        <p class="font-body-sm text-body-sm text-error font-medium mt-1 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-error"></span>{{ para_hoy | length }} para entregar hoy
+        </p>
+        {% else %}
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Todo bajo control por ahora</p>
+        {% endif %}
+      </div>
+      <div class="mt-space-md pt-space-xs flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+        <span>{{ para_hoy | length }} para la semana</span>
+        <a href="{{ url_for('tareas') }}" class="material-symbols-outlined text-[18px] text-outline">chevron_right</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+    <div class="lg:col-span-8 flex flex-col gap-space-md">
+      <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+          <div class="flex items-center gap-space-sm">
+            <span class="material-symbols-outlined text-primary text-[24px]">calendar_view_week</span>
+            <div>
+              <h2 class="font-headline-sm text-headline-sm text-on-surface">Horario Semanal</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Distribución regular del primer cuatrimestre</p>
+            </div>
+          </div>
+          <div class="inline-flex p-1 rounded-lg bg-surface-container">
+            <button class="px-space-md py-1 rounded-md text-on-primary bg-primary font-label-sm text-label-sm font-semibold shadow-sm transition-all" id="btn-view-week" type="button">Toda la semana</button>
+            <button class="px-space-md py-1 rounded-md text-on-surface-variant font-label-sm text-label-sm font-medium hover:text-on-surface transition-all" id="btn-view-today" type="button">Hoy ({{ hoy_corto }})</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-space-md" id="timetable-container">
+          {% for d in semana_labels %}
+          <div class="flex flex-col gap-space-sm {% if d['hoy'] %}bg-surface-container-low/60{% else %}bg-surface-container-low/20{% endif %} rounded-xl p-space-sm">
+            <div class="flex items-center justify-between px-space-xs py-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-headline-sm text-headline-sm {% if d['hoy'] %}text-primary font-bold{% else %}text-on-surface-variant font-semibold{% endif %}">{{ d['corto'] }}</span>
+                {% if d['hoy'] %}<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>{% endif %}
+              </div>
+              <span class="font-label-sm text-label-sm px-2 py-0.5 rounded-md {% if d['hoy'] %}bg-primary-container text-on-primary{% else %}text-outline{% endif %} font-semibold">{{ d['numero'] }}</span>
+            </div>
+            {% for c in por_dia.get(d['idx'], []) %}
+            <div class="bg-surface-container-lowest rounded-lg p-space-md shadow-sm border-l-4 {{ c['color']['left'] }} flex flex-col gap-1 hover:shadow transition-shadow">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container {{ c['color']['text'] }} font-semibold">{{ c['materia_codigo'] or c['materia_nombre'][:4] | upper }}</span>
+                <span class="font-label-sm text-label-sm text-outline">{{ c['hora_inicio'] }} - {{ c['hora_fin'] }}</span>
+              </div>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface leading-snug">{{ c['materia_nombre'] }}</h3>
+              {% if c['aula'] %}
+              <p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">meeting_room</span> {{ c['aula'] }}
+              </p>
+              {% endif %}
+            </div>
+            {% else %}
+            <div class="p-space-md rounded-lg bg-surface-container/40 text-center py-6">
+              <span class="font-label-sm text-label-sm text-outline">Tarde libre</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-space-md pt-space-sm border-t border-surface-container">
+          <div class="flex flex-wrap items-center gap-space-md text-on-surface-variant font-label-sm text-label-sm">
+            {% for dia_col in semana_labels %}
+              {% for c in por_dia.get(dia_col['idx'], []) %}
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded {{ c['color']['dot'] if c['color']['dot'].startswith('bg-[#') else 'bg-primary' }}"></span> {{ c['materia_nombre'] }}
+              </span>
+              {% endfor %}
+            {% endfor %}
+          </div>
+          <a class="inline-flex items-center gap-1 font-label-md text-label-md text-primary font-semibold hover:underline" href="{{ url_for('horario') }}">
+            <span class="">Ver horario completo interactivo</span>
+            <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-4 flex flex-col gap-space-lg">
+      <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">task_alt</span>
+            <h2 class="font-headline-sm text-headline-sm text-on-surface">Tareas Inmediatas</h2>
+          </div>
+          <a href="{{ url_for('tareas') }}" class="font-label-sm text-label-sm text-outline">{{ tareas_count }} pendientes</a>
+        </div>
+        <div class="flex flex-col gap-space-sm" id="tasks-checklist">
+          {% for t in tareas_inmediatas %}
+          <label class="group flex items-start gap-space-sm p-space-sm rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer">
+            <input class="mt-1 w-4 h-4 rounded text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer task-check" type="checkbox" data-toggle-task="{{ t['id'] }}">
+            <div class="flex flex-col min-w-0 flex-1">
+              <span class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors font-medium">{{ t['titulo'] }}</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                {% if t.get('vencida') %}
+                <span class="px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Vencida {{ t['fecha_display'] }}</span>
+                {% elif t.get('para_hoy') %}
+                <span class="px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Hoy {{ t['fecha_display'] }}</span>
+                {% elif t.get('fecha_corta') %}
+                <span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">{{ t['fecha_corta'] }}</span>
+                {% endif %}
+                <span class="font-body-sm text-body-sm text-outline truncate">{{ t['materia_nombre'] or 'Sin materia' }}</span>
+              </div>
+            </div>
+          </label>
+          {% else %}
+          <div class="text-center py-6 font-body-sm text-body-sm text-on-surface-variant">No tenés tareas pendientes 🎉</div>
+          {% endfor %}
+        </div>
+        <a class="w-full py-2 px-3 rounded-lg bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" href="{{ url_for('tareas') }}">
+          <span class="material-symbols-outlined text-[18px]">add_task</span>
+          <span class="">Añadir nueva tarea</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const btnWeek = document.getElementById('btn-view-week');
+  const btnToday = document.getElementById('btn-view-today');
+  const timetable = document.getElementById('timetable-container');
+  if (!btnWeek || !btnToday || !timetable) return;
+
+  function focusToday() {
+    btnToday.className = "px-space-md py-1 rounded-md text-on-primary bg-primary font-label-sm text-label-sm font-semibold shadow-sm transition-all";
+    btnWeek.className = "px-space-md py-1 rounded-md text-on-surface-variant font-label-sm text-label-sm font-medium hover:text-on-surface transition-all";
+    const days = timetable.children;
+    for (let i = 0; i < days.length; i++) {
+      if (i === {{ hoy_idx }}) { days[i].classList.remove('hidden'); days[i].classList.add('md:col-span-5'); }
+      else { days[i].classList.add('hidden'); }
+    }
+  }
+  function focusWeek() {
+    btnWeek.className = "px-space-md py-1 rounded-md text-on-primary bg-primary font-label-sm text-label-sm font-semibold shadow-sm transition-all";
+    btnToday.className = "px-space-md py-1 rounded-md text-on-surface-variant font-label-sm text-label-sm font-medium hover:text-on-surface transition-all";
+    const days = timetable.children;
+    for (let i = 0; i < days.length; i++) {
+      days[i].classList.remove('hidden');
+      if (i === {{ hoy_idx }}) days[i].classList.remove('md:col-span-5');
+    }
+  }
+  btnToday.addEventListener('click', focusToday);
+  btnWeek.addEventListener('click', focusWeek);
+
+  document.querySelectorAll('[data-toggle-task]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      fetch('/api/tareas/' + cb.getAttribute('data-toggle-task'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: cb.checked ? 'completada' : 'pendiente' })
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.ok) { window.location.reload(); }
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}

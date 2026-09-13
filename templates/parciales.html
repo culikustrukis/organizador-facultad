@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Parciales · Organizador Facultad{% endblock %}
+{% block breadcrumb %}Panel Académico{% endblock %}
+
+{% block content %}
+<div class="flex flex-col w-full gap-6 max-w-6xl mx-auto">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-primary font-medium text-xs mb-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        {{ counts['todos'] }} exámenes programados
+      </div>
+      <h1 class="text-2xl lg:text-[28px] font-bold text-on-surface tracking-tight">Parciales y Evaluaciones</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Calendario de parciales, recuperatorios y finales</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors shadow-sm" type="button"><span class="material-symbols-outlined text-[18px]">calendar_month</span><span>Sincronizar</span></button>
+      <button class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-colors shadow-sm" id="btnNuevoExamen" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Nuevo examen</span></button>
+    </div>
+  </div>
+
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+    <div class="flex items-center gap-1.5 p-1 rounded-xl bg-surface-container-low">
+      <button class="filter-btn px-3.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md font-semibold shadow-sm transition-all" data-filter="all" type="button">Todos ({{ counts['todos'] }})</button>
+      <button class="filter-btn px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-all" data-filter="primeros" type="button">Primeros Parciales ({{ counts['primeros'] }})</button>
+      <button class="filter-btn px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-all" data-filter="recuperatorios" type="button">Recuperatorios ({{ counts['recuperatorios'] }})</button>
+      <button class="filter-btn px-3.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-all" data-filter="finales" type="button">Finales ({{ counts['finales'] }})</button>
+    </div>
+    <div class="flex items-center gap-space-sm text-outline font-label-sm text-label-sm">
+      <span class="material-symbols-outlined text-[18px]">swap_vert</span>
+      <span>Orden cronológico</span>
+    </div>
+  </div>
+
+  <div class="rounded-xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 overflow-hidden">
+    <div class="divide-y divide-outline-variant/20">
+      {% for e in examenes %}
+      <div class="exam-card flex flex-col sm:flex-row sm:items-center justify-between p-space-md hover:bg-surface-container-low/40 transition-colors gap-space-md" data-category="{{ e['categoria'] }}">
+        <div class="flex items-center gap-space-md min-w-0">
+          <div class="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-surface-container flex-shrink-0">
+            <span class="font-label-sm text-label-sm uppercase font-bold leading-none {{ e['color']['text'] }}">{{ e['mes'] }}</span>
+            <span class="font-headline-md text-headline-md font-extrabold leading-none mt-0.5 text-on-surface">{{ e['dia'] }}</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold">{{ e['materia_nombre'] or 'Sin materia' }}</h3>
+              {% if e['nombre'] %}<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-medium">{{ e['nombre'] }}</span>{% endif %}
+            </div>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>{{ e['hora'] }} hs</span>
+              <span class="text-outline-variant">•</span>
+              {% if e['aula'] %}<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>{{ e['aula'] }}</span><span class="text-outline-variant">•</span>{% endif %}
+              <span class="text-outline">{{ e['materia_codigo'] or 'S/C' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between sm:justify-end gap-2 flex-shrink-0">
+          {% if e['dias_restantes'] is not none %}
+            {% if e['dias_restantes'] < 0 %}
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Hace {{ -e['dias_restantes'] }} días</span>
+            {% elif e['dias_restantes'] == 0 %}
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>Hoy</span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>En {{ e['dias_restantes'] }} día{{ 's' if e['dias_restantes'] != 1 }}</span>
+            {% endif %}
+          {% endif %}
+          <button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Editar" data-edit-examen="{{ e['id'] }}"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+          <button class="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-colors" title="Eliminar" data-delete-examen="{{ e['id'] }}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+        </div>
+      </div>
+      {% else %}
+      <div class="py-12 flex flex-col items-center justify-center gap-2 text-center">
+        <span class="material-symbols-outlined text-[40px] text-outline">event_upcoming</span>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">No cargaste exámenes todavía.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 hidden" id="modal-examen">
+  <div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-md border border-outline-variant/30 flex flex-col overflow-hidden animate-fade-in">
+    <div class="flex items-center justify-between px-space-lg py-space-md border-b border-outline-variant/20 bg-surface-container-low/30">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">notification_important</span></div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight" id="modalExamenTitle">Nuevo examen</h3>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Cargá la fecha del parcial o evaluación</p>
+        </div>
+      </div>
+      <button aria-label="Cerrar modal" class="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container transition-colors" data-close-modal="modal-examen" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+    <form class="flex flex-col gap-space-md p-space-lg" id="form-examen">
+      <input type="hidden" name="id" id="examen_id">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="exam-subject">Materia <span class="text-error">*</span></label>
+        <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="exam-subject" name="materia_id" required>
+          <option value="">Seleccionar materia...</option>
+          {% for m in materias_select %}<option value="{{ m['id'] }}">{{ m['nombre'] }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="exam-name">Nombre</label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="exam-name" name="nombre" placeholder="1er Parcial" value="1er Parcial">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="exam-category">Categoría</label>
+          <select class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="exam-category" name="categoria">
+            <option value="primeros">Primer Parcial</option>
+            <option value="recuperatorios">Recuperatorio</option>
+            <option value="finales">Final</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="exam-date">Fecha <span class="text-error">*</span></label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="exam-date" name="fecha" type="date" required>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="exam-time">Hora</label>
+          <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="exam-time" name="hora" type="time" value="08:00">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface" for="exam-aula">Aula / Lugar</label>
+        <input class="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/60 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:bg-surface-container transition-colors" id="exam-aula" name="aula" placeholder="Ej: Aula Magna 2 (Pabellón Central)">
+      </div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-sm border-t border-outline-variant/20 mt-1">
+        <button class="h-10 px-space-md rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container hover:text-on-surface transition-colors" data-close-modal="modal-examen" type="button">Cancelar</button>
+        <button class="inline-flex items-center gap-1.5 h-10 px-space-lg rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-95" type="submit"><span class="material-symbols-outlined text-[18px]">check</span><span>Guardar examen</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const EXAMENES_DATA = {{ examenes_json | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/parciales.js') }}"></script>
+{% endblock %}

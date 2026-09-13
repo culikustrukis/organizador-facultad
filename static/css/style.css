@@ -1,0 +1,136 @@
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fade-in 0.18s ease-out; }
+.animate-slide-up { animation: slide-up 0.22s ease-out; }
+
+.toast {
+  position: fixed;
+  top: 76px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #0b1c30;
+  color: #ffffff;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(11, 28, 48, 0.25);
+  animation: slide-up 0.22s ease-out;
+}
+
+.toast.toast-error { background: #ba1a1a; }
+.toast.toast-success { background: #047857; }
+
+body.dark .toast { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
+
+.modal-backdrop {
+  background: rgba(11, 28, 48, 0.35);
+  backdrop-filter: blur(4px);
+}
+
+input[type="checkbox"].task-check {
+  accent-color: #4f46e5;
+}
+
+select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.badge-shadow { box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05); }
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+:root {
+  --c-surface: 248 249 255;
+  --c-surface-lowest: 255 255 255;
+  --c-surface-low: 243 244 252;
+  --c-surface-container: 236 238 250;
+  --c-surface-high: 229 231 246;
+  --c-surface-highest: 221 224 241;
+  --c-on-surface: 16 19 41;
+  --c-on-surface-variant: 73 75 101;
+  --c-outline: 121 125 153;
+  --c-outline-variant: 200 201 225;
+  --c-primary: 53 37 205;
+  --c-on-primary: 255 255 255;
+  --c-primary-container: 225 222 255;
+  --c-on-primary-container: 28 22 107;
+  --c-primary-fixed: 225 222 255;
+  --c-on-primary-fixed: 28 22 107;
+  --c-secondary: 93 93 118;
+  --c-on-secondary: 255 255 255;
+  --c-secondary-container: 224 222 255;
+  --c-on-secondary-container: 74 66 126;
+  --c-secondary-fixed: 224 222 255;
+  --c-on-secondary-fixed: 74 66 126;
+  --c-tertiary: 0 132 148;
+  --c-on-tertiary: 255 255 255;
+  --c-tertiary-container: 157 233 246;
+  --c-on-tertiary-container: 0 75 87;
+  --c-tertiary-fixed: 157 233 246;
+  --c-on-tertiary-fixed: 0 75 87;
+  --c-error: 186 26 26;
+  --c-on-error: 255 255 255;
+  --c-error-container: 255 218 214;
+  --c-on-error-container: 147 0 10;
+}
+
+html.dark {
+  --c-surface: 19 20 29;
+  --c-surface-lowest: 14 15 22;
+  --c-surface-low: 23 24 33;
+  --c-surface-container: 27 28 37;
+  --c-surface-high: 38 39 49;
+  --c-surface-highest: 49 50 61;
+  --c-on-surface: 228 225 255;
+  --c-on-surface-variant: 193 193 211;
+  --c-outline: 145 145 166;
+  --c-outline-variant: 83 84 101;
+  --c-primary: 176 175 255;
+  --c-on-primary: 26 18 106;
+  --c-primary-container: 44 39 132;
+  --c-on-primary-container: 226 224 255;
+  --c-primary-fixed: 226 224 255;
+  --c-on-primary-fixed: 26 18 106;
+  --c-secondary: 200 198 213;
+  --c-on-secondary: 45 44 60;
+  --c-secondary-container: 91 89 108;
+  --c-on-secondary-container: 234 231 248;
+  --c-secondary-fixed: 234 231 248;
+  --c-on-secondary-fixed: 45 44 60;
+  --c-tertiary: 128 209 224;
+  --c-on-tertiary: 0 55 65;
+  --c-tertiary-container: 0 92 105;
+  --c-on-tertiary-container: 157 233 246;
+  --c-tertiary-fixed: 157 233 246;
+  --c-on-tertiary-fixed: 0 55 65;
+  --c-error: 255 180 171;
+  --c-on-error: 105 0 5;
+  --c-error-container: 147 0 10;
+  --c-on-error-container: 255 218 214;
+}
