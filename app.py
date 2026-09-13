@@ -900,6 +900,19 @@ def api_avatar_remove():
     return jsonify({"ok": True})
 
 
+@app.route("/manifest.json")
+def pwa_manifest():
+    return app.send_static_file("manifest.json")
+
+
+@app.route("/sw.js")
+def pwa_service_worker():
+    response = app.send_static_file("sw.js")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
+
+
 def iniciar():
     database.init_db()
     database.seed()

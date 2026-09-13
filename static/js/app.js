@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+
   function fetchJson(url, opts) {
     opts = opts || {};
     opts.headers = Object.assign({}, opts.headers || {});
