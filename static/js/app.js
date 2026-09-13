@@ -57,7 +57,7 @@
       return;
     }
     var backdrop = e.target.closest('.modal-backdrop');
-    if (backdrop && backdrop.classList.contains('hidden') === false) {
+    if (backdrop && e.target === backdrop && backdrop.classList.contains('hidden') === false) {
       backdrop.classList.add('hidden');
     }
   });

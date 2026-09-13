@@ -65,6 +65,73 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+/* ============================================================
+   Tema oscuro · Academic Clarity
+   ============================================================ */
+
+html.dark .modal-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+html.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+html.dark input[type="date"]::-webkit-calendar-picker-indicator,
+html.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+}
+
+/* Botones primarios: al hacer hover sobre "primary-container",
+   el texto debe usar el contraste correcto del contenedor. */
+.hover\:bg-primary-container:hover {
+  color: rgb(var(--c-on-primary-container));
+}
+
+/* Chips/cards por materia: variantes oscuras legibles. Los valores
+   claros originales (academic clarity) solo existen para el tema claro. */
+html.dark .bg-\[\#EEF2FF\] { background-color: #1e1c45; }
+html.dark .bg-\[\#E0E7FF\] { background-color: #262450; }
+html.dark .border-\[\#C7D2FE\] { border-color: #41407f; }
+
+html.dark .bg-\[\#FAF5FF\] { background-color: #241a35; }
+html.dark .bg-\[\#F3E8FF\] { background-color: #2d2243; }
+html.dark .border-\[\#E9D5FF\] { border-color: #513f70; }
+html.dark .text-\[\#7E22CE\] { color: #cba9f2; }
+html.dark .bg-\[\#7E22CE\] { background-color: #c084fc; }
+html.dark .border-l-\[\#7E22CE\] { border-left-color: #c084fc; }
+
+html.dark .bg-\[\#ECFDF5\] { background-color: #072a1f; }
+html.dark .bg-\[\#D1FAE5\] { background-color: #0c3a29; }
+html.dark .border-\[\#A7F3D0\] { border-color: #1d6249; }
+html.dark .text-\[\#047857\] { color: #6ee7b7; }
+html.dark .bg-\[\#047857\] { background-color: #34d399; }
+html.dark .border-l-\[\#047857\] { border-left-color: #34d399; }
+
+html.dark .bg-\[\#F0F9FF\] { background-color: #082331; }
+html.dark .bg-\[\#E0F2FE\] { background-color: #0d3044; }
+html.dark .border-\[\#BAE6FD\] { border-color: #205a7a; }
+html.dark .text-\[\#0369A1\] { color: #7dd3fc; }
+html.dark .bg-\[\#0369A1\] { background-color: #38bdf8; }
+html.dark .border-l-\[\#0369A1\] { border-left-color: #38bdf8; }
+
+html.dark .bg-\[\#FFFBEB\] { background-color: #2b2410; }
+html.dark .bg-\[\#FEF3C7\] { background-color: #3a2f18; }
+html.dark .border-\[\#FDE68A\] { border-color: #6b5a22; }
+html.dark .text-\[\#B45309\] { color: #fcd34d; }
+html.dark .bg-\[\#B45309\] { background-color: #fbbf24; }
+html.dark .border-l-\[\#B45309\] { border-left-color: #fbbf24; }
+
+html.dark .bg-\[\#FFF1F2\] { background-color: #330f16; }
+html.dark .bg-\[\#FFE4E6\] { background-color: #40171f; }
+html.dark .border-\[\#FECDD3\] { border-color: #702b36; }
+html.dark .text-\[\#BE123C\] { color: #fda4af; }
+html.dark .bg-\[\#BE123C\] { background-color: #fb7185; }
+html.dark .border-l-\[\#BE123C\] { border-left-color: #fb7185; }
+
+html.dark .bg-emerald-50 { background-color: #072a1f; }
+html.dark .text-emerald-700 { color: #6ee7b7; }
+html.dark .bg-emerald-500 { background-color: #34d399; }
+html.dark .text-emerald-600 { color: #6ee7b7; }
+
 :root {
   --c-surface: 248 249 255;
   --c-surface-lowest: 255 255 255;

@@ -285,6 +285,7 @@ def dashboard():
     pendientes = [t for t in tareas if t["estado"] == "pendiente"]
     para_hoy = [t for t in pendientes if t.get("para_hoy") or t.get("vencida")]
     prox_examen = min(examenes, key=lambda e: (e["fecha"], e["hora"])) if examenes else None
+    proximos_examenes = [e for e in sorted(examenes, key=lambda e: (e["fecha"], e["hora"])) if (e.get("dias_restantes") or 0) >= 0][:3]
 
     horas_teoricas = 0
     horas_practicas = 0
@@ -329,6 +330,7 @@ def dashboard():
         hoy_idioma_nombre=DIAS[hoy_idx][0],
         hoy_corto=DIAS[hoy_idx][1],
         materias_count=materias_count,
+        materias=materias,
         horas=horas,
         horas_teoricas=horas_teoricas,
         horas_practicas=horas_practicas,
@@ -336,6 +338,7 @@ def dashboard():
         clases_hoy=clases_hoy,
         proxima_clase=proxima_clase,
         prox_examen=prox_examen,
+        proximos_examenes=proximos_examenes,
         total_pendientes=len(pendientes),
         para_hoy=para_hoy,
         por_dia=por_dia,

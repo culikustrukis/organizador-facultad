@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Mi Horario · Organizador Facultad{% endblock %}
-{% block breadcrumb %}Panel Académico{% endblock %}
 
 {% block content %}
 <div class="flex flex-col w-full gap-6">
@@ -14,7 +13,7 @@
           {{ total_horas }} hs semanales • Lunes a Viernes
         </span>
       </div>
-      <p class="text-sm text-on-surface-variant mt-1">1° Cuatrimestre 2026 • Cursada regular</p>
+      <p class="text-sm text-on-surface-variant mt-1">1° Cuatrimestre · Cursada regular</p>
     </div>
     <div class="flex items-center gap-3">
       <div class="inline-flex p-1 bg-surface-container-high/60 rounded-xl border border-outline-variant/30">
@@ -175,7 +174,7 @@
   <div class="bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-md border border-outline-variant/30 flex flex-col overflow-hidden animate-fade-in">
     <div class="flex items-center justify-between px-space-lg py-space-md border-b border-outline-variant/20 bg-surface-container-low/30">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">schedule</span></div>
+        <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed"><span class="material-symbols-outlined text-[20px]">schedule</span></div>
         <div>
           <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight" id="modalClaseTitle">Nueva clase u horario</h3>
           <p class="font-label-sm text-label-sm text-on-surface-variant">Cargá la comisión y el bloque horario</p>

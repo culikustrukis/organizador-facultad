@@ -18,12 +18,12 @@
     <img alt="Organizador Facultad" class="h-8 w-auto object-contain" src="{{ url_for('static', filename='img/logo.svg') }}">
     <div class="flex flex-col">
       <span class="font-headline-sm text-[16px] text-on-surface font-bold leading-tight">Organizador Facultad</span>
-      <span class="font-label-sm text-[11px] text-on-surface-variant leading-tight">Ciclo Lectivo 2026</span>
+      <span class="font-label-sm text-[11px] text-on-surface-variant leading-tight">Student Planner</span>
     </div>
   </a>
   <nav class="flex items-center gap-1">
-    <a class="px-3 py-2 rounded-lg {% if active == 'ingreso' %}bg-primary-container text-on-primary font-semibold{% else %}text-on-surface-variant hover:bg-surface-container transition-colors{% endif %} font-body-md text-[13px]" href="{{ url_for('login') }}">Iniciar Sesión</a>
-    <a class="px-3 py-2 rounded-lg {% if active == 'registro' %}bg-primary-container text-on-primary font-semibold{% else %}text-on-surface-variant hover:bg-surface-container transition-colors{% endif %} font-body-md text-[13px]" href="{{ url_for('register') }}">Crear Cuenta</a>
+    <a class="px-3 py-2 rounded-lg {% if active == 'ingreso' %}bg-primary-container text-on-primary-container font-semibold{% else %}text-on-surface-variant hover:bg-surface-container transition-colors{% endif %} font-body-md text-[13px]" href="{{ url_for('login') }}">Iniciar Sesión</a>
+    <a class="px-3 py-2 rounded-lg {% if active == 'registro' %}bg-primary-container text-on-primary-container font-semibold{% else %}text-on-surface-variant hover:bg-surface-container transition-colors{% endif %} font-body-md text-[13px]" href="{{ url_for('register') }}">Crear Cuenta</a>
   </nav>
 </header>
 
@@ -33,7 +33,7 @@
 
 <footer class="py-5 border-t border-outline-variant/20 bg-surface-container-low/30">
   <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-on-surface-variant font-label-sm text-[12px]">
-    <span>© 2026 Organizador Facultad · Student Planner</span>
+    <span>Organizador Facultad · Student Planner</span>
     <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">school</span> Hecho para estudiantes</span>
   </div>
 </footer>

@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Configuración · Organizador Facultad{% endblock %}
-{% block breadcrumb %}Ajustes de cuenta{% endblock %}
 
 {% block content %}
 <div class="flex flex-col w-full gap-6 max-w-4xl mx-auto">
@@ -27,7 +26,7 @@
         {% endif %}
         <div class="flex flex-col items-center sm:items-start gap-3">
           <div class="flex items-center gap-2 flex-wrap justify-center">
-            <label class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary transition-colors cursor-pointer shadow-sm">
+            <label class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors cursor-pointer shadow-sm">
               <span class="material-symbols-outlined text-[16px]">cloud_upload</span>
               <span>+ Cambiar foto</span>
               <input id="avatar-file" class="hidden" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
@@ -48,7 +47,7 @@
           <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Datos de identidad</h2>
           <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Tu nombre formal para certificados y listas de comisiones.</p>
         </div>
-        <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm px-2.5 py-1 rounded-lg bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[14px]">school</span>{{ (current_user['carrera'] or 'Carrera').split('(')[0] | trim }}</span>
+        <span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm px-2.5 py-1 rounded-lg bg-primary-fixed text-on-primary-fixed"><span class="material-symbols-outlined text-[14px]">school</span>{{ (current_user['carrera'] or 'Carrera').split('(')[0] | trim }}</span>
       </div>
       <div class="p-6 flex flex-col gap-5">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
