@@ -142,6 +142,71 @@
     }).catch(function () { window.showToast('Error de conexión.', 'error'); });
   });
 
+  var togglingIds = {};
+
+  function applyTaskState(tarea, estado) {
+    tarea.estado = estado;
+    var esCompletada = estado === 'completada';
+    var id = tarea.id;
+
+    var row = document.querySelector('.task-row[data-id="' + id + '"]');
+    if (row) {
+      row.setAttribute('data-estado', estado);
+      var btn = row.querySelector('[data-toggle-tarea]');
+      if (btn) {
+        btn.className = 'mt-1 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-colors ' +
+          (esCompletada ? 'bg-primary text-on-primary' : 'bg-surface-container-highest text-transparent hover:text-primary');
+        btn.setAttribute('title', esCompletada ? 'Marcar como pendiente' : 'Marcar como completada');
+      }
+      var titleEl = row.querySelector('h2');
+      if (titleEl) {
+        titleEl.classList.toggle('line-through', esCompletada);
+        titleEl.classList.toggle('text-on-surface-variant', esCompletada);
+      }
+      var header = titleEl ? titleEl.parentElement : null;
+      if (header) {
+        var chips = Array.prototype.filter.call(header.children, function (el) { return el !== titleEl; });
+        var doneBadge = header.querySelector('.badge-completada-optimistic');
+        if (esCompletada) {
+          chips.forEach(function (el) { el.style.display = 'none'; });
+          if (!doneBadge) {
+            var span = document.createElement('span');
+            span.className = 'px-1.5 py-0.2 rounded bg-primary/10 text-primary font-label-sm text-label-sm font-semibold badge-completada-optimistic';
+            span.textContent = 'Completada';
+            header.appendChild(span);
+          }
+        } else {
+          if (doneBadge) doneBadge.remove();
+          chips.forEach(function (el) { el.style.display = ''; });
+        }
+      }
+    }
+
+    var card = null;
+    document.querySelectorAll('#view-kanban .kanban-card').forEach(function (c) {
+      var del = c.querySelector('[data-delete-tarea]');
+      if (del && Number(del.getAttribute('data-delete-tarea')) === id) card = c;
+    });
+    if (card) {
+      card.setAttribute('data-estado', estado);
+      var h3 = card.querySelector('h3');
+      if (h3) {
+        h3.classList.toggle('line-through', esCompletada);
+        h3.classList.toggle('text-on-surface-variant', esCompletada);
+      }
+      var target = estado === 'completada' ? 'done'
+        : (isUrgent(tarea) ? 'urgente' : (tarea.prioridad === 'media' ? 'media' : 'baja'));
+      var col = card.closest('.kanban-col');
+      if (col && col.getAttribute('data-kcol') !== target) {
+        var dest = document.querySelector('#view-kanban .kanban-col[data-kcol="' + target + '"] .kanban-cards');
+        if (dest) dest.appendChild(card);
+      }
+      updateKanbanCounts();
+    }
+
+    applyListFilter();
+  }
+
   document.addEventListener('click', function (e) {
     var editBtn = e.target.closest('[data-edit-tarea]');
     if (editBtn) {
@@ -165,11 +230,23 @@
     var togBtn = e.target.closest('[data-toggle-tarea]');
     if (togBtn) {
       var gid = Number(togBtn.getAttribute('data-toggle-tarea'));
+      if (togglingIds[gid]) return;
       var gt = taskById(gid);
-      var nuevo = gt && gt.estado === 'completada' ? 'pendiente' : 'completada';
+      if (!gt) return;
+      var anterior = gt.estado;
+      var nuevo = anterior === 'completada' ? 'pendiente' : 'completada';
+      togglingIds[gid] = true;
+      applyTaskState(gt, nuevo);
       window.fetcher('/api/tareas/' + gid, { method: 'PUT', body: { estado: nuevo } }).then(function (res) {
-        if (res.ok) { window.location.reload(); }
-        else { window.showToast('No se pudo actualizar.', 'error'); }
+        togglingIds[gid] = false;
+        if (!res.ok) {
+          applyTaskState(gt, anterior);
+          window.showToast(res.message || 'No se pudo actualizar.', 'error');
+        }
+      }).catch(function () {
+        togglingIds[gid] = false;
+        applyTaskState(gt, anterior);
+        window.showToast('Error de conexión.', 'error');
       });
     }
   });

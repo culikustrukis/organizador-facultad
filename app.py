@@ -31,7 +31,7 @@ UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "organizador-facultad-dev-key")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "organizador-facultad-dev-key"
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
 
@@ -46,7 +46,7 @@ def load_user():
     user_id = session.get("user_id")
     if user_id:
         g.user = database.get_db().execute(
-            "SELECT * FROM users WHERE id = ?", (user_id,)
+            "SELECT * FROM users WHERE id = %s", (user_id,)
         ).fetchone()
 
 
@@ -72,7 +72,7 @@ def get_clases_with_materia():
         SELECT c.*, m.nombre AS materia_nombre, m.codigo AS materia_codigo, m.color AS materia_color,
                m.profesor AS materia_profesor
         FROM clases c JOIN materias m ON m.id = c.materia_id
-        WHERE c.user_id = ? ORDER BY c.dia, c.hora_inicio
+        WHERE c.user_id = %s ORDER BY c.dia, c.hora_inicio
         """,
         (g.user["id"],),
     ).fetchall()
@@ -89,7 +89,7 @@ def enrich_clase(clase):
 def materias_del_usuario():
     db = database.get_db()
     rows = db.execute(
-        "SELECT * FROM materias WHERE user_id = ? ORDER BY nombre",
+        "SELECT * FROM materias WHERE user_id = %s ORDER BY nombre",
         (g.user["id"],),
     ).fetchall()
     materias = []
@@ -113,7 +113,7 @@ def tareas_del_usuario():
         """
         SELECT t.*, m.nombre AS materia_nombre, m.color AS materia_color
         FROM tareas t LEFT JOIN materias m ON m.id = t.materia_id
-        WHERE t.user_id = ? ORDER BY
+        WHERE t.user_id = %s ORDER BY
             CASE WHEN t.estado = 'pendiente' THEN 0 ELSE 1 END,
             t.fecha_limite ASC
         """,
@@ -150,7 +150,7 @@ def examenes_del_usuario():
         """
         SELECT e.*, m.nombre AS materia_nombre, m.codigo AS materia_codigo, m.color AS materia_color
         FROM examenes e LEFT JOIN materias m ON m.id = e.materia_id
-        WHERE e.user_id = ? ORDER BY e.fecha, e.hora
+        WHERE e.user_id = %s ORDER BY e.fecha, e.hora
         """,
         (g.user["id"],),
     ).fetchall()
@@ -171,7 +171,7 @@ def inject_globals():
         if not g.user:
             return 0
         return database.get_db().execute(
-            "SELECT COUNT(*) AS c FROM tareas WHERE user_id = ? AND estado = 'pendiente'",
+            "SELECT COUNT(*) AS c FROM tareas WHERE user_id = %s AND estado = 'pendiente'",
             (g.user["id"],),
         ).fetchone()["c"]
 
@@ -180,7 +180,7 @@ def inject_globals():
             return 0
         hoy = datetime.date.today().isoformat()
         return database.get_db().execute(
-            "SELECT COUNT(*) AS c FROM examenes WHERE user_id = ? AND fecha >= ?",
+            "SELECT COUNT(*) AS c FROM examenes WHERE user_id = %s AND fecha >= %s",
             (g.user["id"], hoy),
         ).fetchone()["c"]
 
@@ -226,7 +226,7 @@ def api_login():
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
     row = database.get_db().execute(
-        "SELECT * FROM users WHERE username = ? OR email = ?", (username, username)
+        "SELECT * FROM users WHERE username = %s OR email = %s", (username, username)
     ).fetchone()
     if not row or not check_password_hash(row["password_hash"], password):
         return jsonify({"ok": False, "message": "Usuario o contraseña incorrectos."}), 401
@@ -247,16 +247,16 @@ def api_register():
     if len(password) < 6:
         return jsonify({"ok": False, "message": "La contraseña debe tener al menos 6 caracteres."}), 400
     db = database.get_db()
-    existing = db.execute("SELECT id FROM users WHERE username = ? OR email = ?", (username, email)).fetchone()
+    existing = db.execute("SELECT id FROM users WHERE username = %s OR email = %s", (username, email)).fetchone()
     if existing:
         return jsonify({"ok": False, "message": "Ese usuario o correo ya está registrado."}), 409
     cur = db.execute(
-        "INSERT INTO users (username, password_hash, full_name, email, carrera) VALUES (?,?,?,?,?)",
+        "INSERT INTO users (username, password_hash, full_name, email, carrera) VALUES (%s,%s,%s,%s,%s) RETURNING id",
         (username, generate_password_hash(password), full_name or username, email, "Licenciatura en Sistemas"),
     )
+    new_id = cur.fetchone()["id"]
     db.commit()
-    session.clear()
-    session["user_id"] = cur.lastrowid
+    session["user_id"] = new_id
     return jsonify({"ok": True, "redirect": url_for("dashboard")})
 
 
@@ -555,7 +555,7 @@ def body_json():
 def color_auto():
     db = database.get_db()
     rows = db.execute(
-        "SELECT color, COUNT(*) AS n FROM materias WHERE user_id = ? AND color != '' GROUP BY color",
+        "SELECT color, COUNT(*) AS n FROM materias WHERE user_id = %s AND color != '' GROUP BY color",
         (g.user["id"],),
     ).fetchall()
     usados = {r["color"]: r["n"] for r in rows}
@@ -575,7 +575,7 @@ def api_materia_create():
     db = database.get_db()
     cur = db.execute(
         """INSERT INTO materias (user_id, codigo, nombre, profesor, modalidad, horas_semana, aula, comision, color, regimen)
-           VALUES (?,?,?,?,?,?,?,?,?,?)""",
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
         (
             g.user["id"],
             (data.get("codigo") or "").strip().upper(),
@@ -589,8 +589,9 @@ def api_materia_create():
             data.get("regimen") or "promocionable",
         ),
     )
+    new_id = cur.fetchone()["id"]
     db.commit()
-    return jsonify({"ok": True, "id": cur.lastrowid, "redirect": url_for("materias")})
+    return jsonify({"ok": True, "id": new_id, "redirect": url_for("materias")})
 
 
 @app.route("/api/materias/<int:materia_id>", methods=["PUT", "DELETE"])
@@ -598,12 +599,12 @@ def api_materia_create():
 def api_materia(materia_id):
     db = database.get_db()
     existing = db.execute(
-        "SELECT id FROM materias WHERE id = ? AND user_id = ?", (materia_id, g.user["id"])
+        "SELECT id FROM materias WHERE id = %s AND user_id = %s", (materia_id, g.user["id"])
     ).fetchone()
     if not existing:
         return jsonify({"ok": False, "message": "Materia no encontrada."}), 404
     if request.method == "DELETE":
-        db.execute("DELETE FROM materias WHERE id = ?", (materia_id,))
+        db.execute("DELETE FROM materias WHERE id = %s", (materia_id,))
         db.commit()
         return jsonify({"ok": True})
     data = body_json()
@@ -611,8 +612,8 @@ def api_materia(materia_id):
     if not nombre:
         return jsonify({"ok": False, "message": "El nombre de la materia es obligatorio."}), 400
     db.execute(
-        """UPDATE materias SET codigo = ?, nombre = ?, profesor = ?, modalidad = ?, horas_semana = ?,
-           aula = ?, comision = ?, regimen = ? WHERE id = ?""",
+        """UPDATE materias SET codigo = %s, nombre = %s, profesor = %s, modalidad = %s, horas_semana = %s,
+           aula = %s, comision = %s, regimen = %s WHERE id = %s""",
         (
             (data.get("codigo") or "").strip().upper(),
             nombre,
@@ -632,7 +633,7 @@ def api_materia(materia_id):
 def check_clase_conflict(materia_id, dia, hora_inicio, hora_fin, ignore_id=None):
     db = database.get_db()
     rows = db.execute(
-        "SELECT id FROM clases WHERE user_id = ? AND dia = ?",
+        "SELECT id FROM clases WHERE user_id = %s AND dia = %s",
         (g.user["id"], dia),
     ).fetchall()
     conflicts = []
@@ -640,7 +641,7 @@ def check_clase_conflict(materia_id, dia, hora_inicio, hora_fin, ignore_id=None)
         if ignore_id is not None and row["id"] == ignore_id:
             continue
         c = db.execute(
-            """SELECT c.*, m.nombre AS materia_nombre FROM clases c JOIN materias m ON m.id = c.materia_id WHERE c.id = ?""",
+            """SELECT c.*, m.nombre AS materia_nombre FROM clases c JOIN materias m ON m.id = c.materia_id WHERE c.id = %s""",
             (row["id"],),
         ).fetchone()
         if c and to_minutes(hora_inicio) < to_minutes(c["hora_fin"]) and to_minutes(hora_fin) > to_minutes(c["hora_inicio"]):
@@ -672,11 +673,12 @@ def api_clase_create():
     conflicts = check_clase_conflict(materia_id, dia, hora_inicio, hora_fin)
     db = database.get_db()
     cur = db.execute(
-        "INSERT INTO clases (user_id, materia_id, dia, hora_inicio, hora_fin, tipo, aula) VALUES (?,?,?,?,?,?,?)",
+        "INSERT INTO clases (user_id, materia_id, dia, hora_inicio, hora_fin, tipo, aula) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id",
         (g.user["id"], materia_id, dia, hora_inicio, hora_fin, data.get("tipo") or "teorica", (data.get("aula") or "").strip()),
     )
+    new_id = cur.fetchone()["id"]
     db.commit()
-    return jsonify({"ok": True, "id": cur.lastrowid, "conflicts": conflicts})
+    return jsonify({"ok": True, "id": new_id, "conflicts": conflicts})
 
 
 @app.route("/api/clases/<int:clase_id>", methods=["PUT", "DELETE"])
@@ -684,12 +686,12 @@ def api_clase_create():
 def api_clase(clase_id):
     db = database.get_db()
     existing = db.execute(
-        "SELECT id FROM clases WHERE id = ? AND user_id = ?", (clase_id, g.user["id"])
+        "SELECT id FROM clases WHERE id = %s AND user_id = %s", (clase_id, g.user["id"])
     ).fetchone()
     if not existing:
         return jsonify({"ok": False, "message": "Clase no encontrada."}), 404
     if request.method == "DELETE":
-        db.execute("DELETE FROM clases WHERE id = ?", (clase_id,))
+        db.execute("DELETE FROM clases WHERE id = %s", (clase_id,))
         db.commit()
         return jsonify({"ok": True})
     data = body_json()
@@ -701,7 +703,7 @@ def api_clase(clase_id):
         return jsonify({"ok": False, "message": "Datos de horario inválidos."}), 400
     conflicts = check_clase_conflict(materia_id, dia, hora_inicio, hora_fin, ignore_id=clase_id)
     db.execute(
-        "UPDATE clases SET materia_id = ?, dia = ?, hora_inicio = ?, hora_fin = ?, tipo = ?, aula = ? WHERE id = ?",
+        "UPDATE clases SET materia_id = %s, dia = %s, hora_inicio = %s, hora_fin = %s, tipo = %s, aula = %s WHERE id = %s",
         (materia_id, dia, hora_inicio, hora_fin, data.get("tipo") or "teorica", (data.get("aula") or "").strip(), clase_id),
     )
     db.commit()
@@ -718,7 +720,7 @@ def api_tarea_create():
     db = database.get_db()
     cur = db.execute(
         """INSERT INTO tareas (user_id, materia_id, titulo, descripcion, fecha_limite, prioridad, tipo_entrega, estado)
-           VALUES (?,?,?,?,?,?,?, 'pendiente')""",
+           VALUES (%s,%s,%s,%s,%s,%s,%s, 'pendiente') RETURNING id""",
         (
             g.user["id"],
             int(data.get("materia_id") or 0) or None,
@@ -729,8 +731,9 @@ def api_tarea_create():
             data.get("tipo_entrega") or "individual",
         ),
     )
+    new_id = cur.fetchone()["id"]
     db.commit()
-    return jsonify({"ok": True, "id": cur.lastrowid, "redirect": url_for("tareas")})
+    return jsonify({"ok": True, "id": new_id, "redirect": url_for("tareas")})
 
 
 @app.route("/api/tareas/<int:tarea_id>", methods=["PUT", "DELETE"])
@@ -738,12 +741,12 @@ def api_tarea_create():
 def api_tarea(tarea_id):
     db = database.get_db()
     row = db.execute(
-        "SELECT * FROM tareas WHERE id = ? AND user_id = ?", (tarea_id, g.user["id"])
+        "SELECT * FROM tareas WHERE id = %s AND user_id = %s", (tarea_id, g.user["id"])
     ).fetchone()
     if not row:
         return jsonify({"ok": False, "message": "Tarea no encontrada."}), 404
     if request.method == "DELETE":
-        db.execute("DELETE FROM tareas WHERE id = ?", (tarea_id,))
+        db.execute("DELETE FROM tareas WHERE id = %s", (tarea_id,))
         db.commit()
         return jsonify({"ok": True})
     data = body_json()
@@ -752,8 +755,8 @@ def api_tarea(tarea_id):
         return data[key] if key in data else row[key]
 
     db.execute(
-        """UPDATE tareas SET titulo = ?, descripcion = ?, fecha_limite = ?, prioridad = ?,
-           tipo_entrega = ?, estado = ?, materia_id = ? WHERE id = ?""",
+        """UPDATE tareas SET titulo = %s, descripcion = %s, fecha_limite = %s, prioridad = %s,
+           tipo_entrega = %s, estado = %s, materia_id = %s WHERE id = %s""",
         (
             (val("titulo") or "").strip(),
             (val("descripcion") or "").strip(),
@@ -778,7 +781,7 @@ def api_examen_create():
         return jsonify({"ok": False, "message": "La fecha del examen es obligatoria."}), 400
     db = database.get_db()
     cur = db.execute(
-        "INSERT INTO examenes (user_id, materia_id, nombre, categoria, fecha, hora, aula) VALUES (?,?,?,?,?,?,?)",
+        "INSERT INTO examenes (user_id, materia_id, nombre, categoria, fecha, hora, aula) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id",
         (
             g.user["id"],
             int(data.get("materia_id") or 0) or None,
@@ -789,8 +792,9 @@ def api_examen_create():
             (data.get("aula") or "").strip(),
         ),
     )
+    new_id = cur.fetchone()["id"]
     db.commit()
-    return jsonify({"ok": True, "id": cur.lastrowid, "redirect": url_for("parciales")})
+    return jsonify({"ok": True, "id": new_id, "redirect": url_for("parciales")})
 
 
 @app.route("/api/examenes/<int:examen_id>", methods=["DELETE", "PUT"])
@@ -798,17 +802,17 @@ def api_examen_create():
 def api_examen(examen_id):
     db = database.get_db()
     existing = db.execute(
-        "SELECT id FROM examenes WHERE id = ? AND user_id = ?", (examen_id, g.user["id"])
+        "SELECT id FROM examenes WHERE id = %s AND user_id = %s", (examen_id, g.user["id"])
     ).fetchone()
     if not existing:
         return jsonify({"ok": False, "message": "Examen no encontrado."}), 404
     if request.method == "DELETE":
-        db.execute("DELETE FROM examenes WHERE id = ?", (examen_id,))
+        db.execute("DELETE FROM examenes WHERE id = %s", (examen_id,))
         db.commit()
         return jsonify({"ok": True})
     data = body_json()
     db.execute(
-        "UPDATE examenes SET materia_id = ?, nombre = ?, categoria = ?, fecha = ?, hora = ?, aula = ? WHERE id = ?",
+        "UPDATE examenes SET materia_id = %s, nombre = %s, categoria = %s, fecha = %s, hora = %s, aula = %s WHERE id = %s",
         (
             int(data.get("materia_id") or 0) or None,
             (data.get("nombre") or "Parcial").strip(),
@@ -830,7 +834,7 @@ def api_perfil():
     db = database.get_db()
     full_name = (data.get("full_name") or g.user["full_name"] or "").strip()
     carrera = (data.get("carrera") or g.user["carrera"] or "").strip()
-    db.execute("UPDATE users SET full_name = ?, carrera = ? WHERE id = ?", (full_name, carrera, g.user["id"]))
+    db.execute("UPDATE users SET full_name = %s, carrera = %s WHERE id = %s", (full_name, carrera, g.user["id"]))
     db.commit()
     return jsonify({"ok": True, "message": "Cambios guardados."})
 
@@ -841,7 +845,7 @@ def api_tema():
     data = body_json()
     tema = "dark" if data.get("tema") == "dark" else "light"
     db = database.get_db()
-    db.execute("UPDATE users SET theme = ? WHERE id = ?", (tema, g.user["id"]))
+    db.execute("UPDATE users SET theme = %s WHERE id = %s", (tema, g.user["id"]))
     db.commit()
     return jsonify({"ok": True})
 
@@ -859,7 +863,7 @@ def api_avatar():
     nombre = f"user_{g.user['id']}_{uuid.uuid4().hex[:8]}.{ext}"
     archivo.save(os.path.join(UPLOAD_DIR, nombre))
     db = database.get_db()
-    db.execute("UPDATE users SET avatar = ? WHERE id = ?", (nombre, g.user["id"]))
+    db.execute("UPDATE users SET avatar = %s WHERE id = %s", (nombre, g.user["id"]))
     db.commit()
     return jsonify({"ok": True, "avatar": url_for("static", filename=f"uploads/{nombre}")})
 
@@ -868,7 +872,7 @@ def api_avatar():
 @login_required
 def api_avatar_remove():
     db = database.get_db()
-    db.execute("UPDATE users SET avatar = '' WHERE id = ?", (g.user["id"],))
+    db.execute("UPDATE users SET avatar = '' WHERE id = %s", (g.user["id"],))
     db.commit()
     return jsonify({"ok": True})
 
